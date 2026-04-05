@@ -275,30 +275,7 @@
 <body>
 
 
-<!-- TELA DE LICENCA ADMIN -->
-<div id="tela-licenca-adm" style="display:none; position:fixed; inset:0; background:#0a0a0a; z-index:99999; align-items:center; justify-content:center; flex-direction:column; gap:24px; font-family:'Inter',sans-serif;">
-    <div style="text-align:center;">
-        <div style="font-family:'Cinzel',serif; font-size:1.8rem; color:#c5a059; letter-spacing:6px;">💈 PAINEL ADMIN</div>
-        <div style="font-size:0.55rem; color:#555; letter-spacing:3px; margin-top:5px;">EL NEGRONE'S BARBEARIA</div>
-    </div>
-    <div style="background:#111; border:1px solid #222; padding:35px; width:340px; max-width:90vw; position:relative;">
-        <div style="position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,#c5a059,transparent);"></div>
-        <div style="font-size:0.55rem; color:#555; letter-spacing:3px; margin-bottom:20px; text-align:center;">// CODIGO DE LICENCA</div>
-        <input id="adm-licenca-input" type="text" placeholder="ELN-XXX-YYY-ZZZ"
-            style="width:100%; background:#0a0a0a; border:1px solid #333; color:#fff; padding:14px; font-family:'Fira Code',monospace; font-size:0.85rem; text-align:center; letter-spacing:3px; text-transform:uppercase; outline:none; margin-bottom:14px; box-sizing:border-box;"
-            onkeydown="if(event.key==='Enter') ativarLicenca()">
-        <button id="adm-licenca-btn" onclick="ativarLicenca()"
-            style="width:100%; background:#c5a059; color:#000; border:none; padding:14px; font-weight:900; font-size:0.75rem; letter-spacing:2px; cursor:pointer;">
-            [ ATIVAR ]
-        </button>
-        <div id="adm-licenca-err" style="font-size:0.6rem; color:#ff4d4d; text-align:center; margin-top:12px; min-height:16px;"></div>
-        <div style="margin-top:20px; text-align:center; font-size:0.55rem; color:#444;">
-            Suporte: <a href="https://wa.me/5512988600188" target="_blank" style="color:#c5a059; text-decoration:none;">WhatsApp</a>
-        </div>
-    </div>
-</div>
-
-<div id="main-app" style="display:none;">
+<div id="main-app">
     <div class="top-nav-container">
         <div class="tab-bar">
             <div class="tab-btn active" onclick="switchTab('agenda', this)"><span>📅</span><span>AGENDA</span></div>
@@ -504,93 +481,16 @@
 </div>
 
 <script>
-    // =====================================================
-    // FIREBASE DO CLIENTE (banco de dados de agendamentos)
-    // =====================================================
-    const firebaseConfig = {
+    const firebaseConfig = { 
         apiKey: "AIzaSyCpgSr9MCmJvylVZgS0Acj0_u8UT8tkl-o",
         authDomain: "projeto-agend-barber.firebaseapp.com",
         projectId: "projeto-agend-barber",
         storageBucket: "projeto-agend-barber.firebasestorage.app",
         messagingSenderId: "368845787419",
-        appId: "1:368845787419:web:4eecbf361b2fe4d7e5c3be"
+        appId: "1:368845787419:web:cc902e9081e3a35cac2ae1"
     };
-
-    // =====================================================
-    // FIREBASE DO PAINEL (valida a licenca)
-    // =====================================================
-    const firebaseConfigPainel = {
-        apiKey: "AIzaSyDVg9GkKufgXp2orM9A4Hrxao3H0w5s1-U",
-        authDomain: "barber-hotmark.firebaseapp.com",
-        projectId: "barber-hotmark",
-        storageBucket: "barber-hotmark.firebasestorage.app",
-        messagingSenderId: "596707824864",
-        appId: "1:596707824864:web:dfd4162b1cf7157d91ec85"
-    };
-
-    const appCliente = firebase.initializeApp(firebaseConfig, "cliente");
-    const appPainel  = firebase.initializeApp(firebaseConfigPainel, "painel");
-    const db         = firebase.firestore(appCliente);
-    const dbPainel   = firebase.firestore(appPainel);
-
-    // =====================================================
-    // SISTEMA DE LICENCA — ADMIN
-    // =====================================================
-    const LICENCA_KEY = 'elnegrones_licenca_codigo';
-
-    async function verificarLicenca(codigo) {
-        try {
-            const snap = await dbPainel.collection("licencas")
-                .where("codigo", "==", codigo.trim().toUpperCase())
-                .where("status", "==", "ativo")
-                .get();
-            return !snap.empty;
-        } catch(e) {
-            console.error("Erro ao verificar licenca:", e);
-            return false;
-        }
-    }
-
-    async function ativarLicenca() {
-        const input = document.getElementById('adm-licenca-input');
-        const btn   = document.getElementById('adm-licenca-btn');
-        const err   = document.getElementById('adm-licenca-err');
-        const codigo = input.value.trim().toUpperCase();
-
-        if (!codigo) { err.textContent = "Digite o codigo."; return; }
-        btn.disabled = true;
-        btn.textContent = "VERIFICANDO...";
-        err.textContent = "";
-
-        const valido = await verificarLicenca(codigo);
-        if (valido) {
-            localStorage.setItem(LICENCA_KEY, codigo);
-            document.getElementById('tela-licenca-adm').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-        } else {
-            err.textContent = "Codigo invalido ou inativo.";
-            btn.disabled = false;
-            btn.textContent = "[ ATIVAR ]";
-        }
-    }
-
-    async function initAdminApp() {
-        const codigoSalvo = localStorage.getItem(LICENCA_KEY);
-        if (codigoSalvo) {
-            const valido = await verificarLicenca(codigoSalvo);
-            if (valido) {
-                document.getElementById('tela-licenca-adm').style.display = 'none';
-                document.getElementById('main-app').style.display = 'block';
-                return;
-            } else {
-                localStorage.removeItem(LICENCA_KEY);
-            }
-        }
-        document.getElementById('tela-licenca-adm').style.display = 'flex';
-        document.getElementById('main-app').style.display = 'none';
-    }
-
-    initAdminApp();
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
     // --- FUNÇÃO DE LIMPEZA APRIMORADA ---
 async function limparAgendamentosConcluidos() {

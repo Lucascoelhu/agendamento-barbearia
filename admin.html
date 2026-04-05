@@ -1337,9 +1337,19 @@ async function excluirBloqueioDireto(id) {
     if (bId) q = q.where("barbeiroId", "==", bId);
     if (dataFiltro) q = q.where("data", "==", dataFiltro);
 
-    q = q.orderBy("data", "asc").orderBy("hora", "asc");
-
     q.onSnapshot(snap => {
+        // Ordena no cliente para evitar necessidade de índice composto no Firestore
+        const docs = [];
+        snap.forEach(doc => docs.push(doc));
+        docs.sort((a, b) => {
+            const da = a.data(), db2 = b.data();
+            if (da.data < db2.data) return -1;
+            if (da.data > db2.data) return 1;
+            if (da.hora < db2.hora) return -1;
+            if (da.hora > db2.hora) return 1;
+            return 0;
+        });
+        snap = { forEach: (fn) => docs.forEach(doc => fn(doc)), empty: docs.length === 0 };
         render.innerHTML = "";
         if (snap.empty) {
             render.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: var(--text-dim);"><span style="font-size: 3rem; display: block; margin-bottom: 10px;">📅</span><b style="color: var(--primary); font-size: 0.9rem; text-transform: uppercase;">Sem agendamentos</b></div>`;
@@ -1419,6 +1429,9 @@ async function excluirBloqueioDireto(id) {
                 </div>
             </div>`;
         });
+    }, error => {
+        console.error("Erro ao carregar agenda:", error);
+        render.innerHTML = `<div style="text-align: center; padding: 30px; color: var(--danger);"><b>⚠️ Erro ao carregar agendamentos</b><br><span style="font-size:0.7rem; color:#666;">${error.message}</span></div>`;
     });
 }
 

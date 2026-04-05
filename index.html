@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>✂️ Barbearia | Agendamento</title>
+    <title>✂️ El Negrones | Agendamento</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
@@ -491,33 +491,6 @@
 
 <body>
 
-<!-- TELA DE LICENÇA -->
-<div id="tela-licenca" style="display:none; position:fixed; inset:0; background:#050505; z-index:99999; align-items:center; justify-content:center; flex-direction:column; gap:24px; font-family:'Inter',sans-serif;">
-    <div style="text-align:center;">
-        <div style="font-family:'Cinzel',serif; font-size:2rem; color:#c5a059; letter-spacing:6px; text-shadow:0 0 30px rgba(197,160,89,0.4);">✂️ EL NEGRONE'S</div>
-        <div style="font-size:0.65rem; color:#555; letter-spacing:3px; margin-top:5px;">SISTEMA DE AGENDAMENTO</div>
-    </div>
-    <div style="background:#111; border:1px solid #222; padding:35px; width:340px; max-width:90vw; border-radius:6px; position:relative;">
-        <div style="position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,#c5a059,transparent);"></div>
-        <div style="font-size:0.55rem; color:#555; letter-spacing:3px; margin-bottom:20px; text-align:center;">// ATIVAÇÃO DE LICENÇA</div>
-        <label style="font-size:0.55rem; color:#c5a059; letter-spacing:2px; display:block; margin-bottom:8px;">CÓDIGO DE LICENÇA</label>
-        <input id="licenca-input" type="text" placeholder="ELN-XXX-YYY-ZZZ"
-            style="width:100%; background:#0a0a0a; border:1px solid #333; color:#fff; padding:14px; font-family:'Fira Code',monospace; font-size:0.85rem; text-align:center; letter-spacing:3px; text-transform:uppercase; outline:none; margin-bottom:14px;"
-            onkeydown="if(event.key==='Enter') ativarLicenca()">
-        <button id="licenca-btn" onclick="ativarLicenca()"
-            style="width:100%; background:#c5a059; color:#000; border:none; padding:14px; font-weight:900; font-size:0.75rem; letter-spacing:2px; cursor:pointer; font-family:'Inter',sans-serif;">
-            [ ATIVAR SISTEMA ]
-        </button>
-        <div id="licenca-err" style="font-size:0.6rem; color:#ff4d4d; text-align:center; margin-top:12px; min-height:16px;"></div>
-        <div style="margin-top:20px; text-align:center; font-size:0.55rem; color:#444; letter-spacing:1px;">
-            Não tem um código? <a href="https://wa.me/5512988600188" target="_blank" style="color:#c5a059; text-decoration:none;">Adquira agora</a>
-        </div>
-    </div>
-</div>
-
-<!-- APP PRINCIPAL -->
-<div id="app-principal" style="display:none;">
-
     <div id="modal-sucesso">
     <div class="success-card">
         <div style="font-size: 3rem; margin-bottom: 10px;">✂️</div>
@@ -552,13 +525,7 @@
 
     <div class="container">
         <div class="header">
-            <!-- LOGO: Substitua o src abaixo pela logo do cliente -->
-            <!-- <img src="LOGO_DO_CLIENTE.png" alt="Logo" class="logo-img"> -->
-            <div class="logo-img" style="display:flex; align-items:center; justify-content:center; width:120px; height:120px; margin:0 auto;">
-                <svg viewBox="0 0 100 100" width="100" height="100" xmlns="http://www.w3.org/2000/svg">
-                    <text y=".9em" font-size="90" text-anchor="middle" x="50">✂️</text>
-                </svg>
-            </div>
+            <img src="logo_insta.png" alt="Logo" class="logo-img">
             <p>Rua Ramira Cabral, 73 - CENTRO JACAREÍ - SP</p>
             <div class="social-header">
                 <a href="https://www.instagram.com/el_negrones" target="_blank"><i class="fab fa-instagram"></i></a>
@@ -607,108 +574,26 @@
     </div>
 
     <script>
-        // =====================================================
-        // FIREBASE DO CLIENTE (banco de dados de agendamentos)
-        // =====================================================
         const firebaseConfig = {
             apiKey: "AIzaSyCpgSr9MCmJvylVZgS0Acj0_u8UT8tkl-o",
             authDomain: "projeto-agend-barber.firebaseapp.com",
             projectId: "projeto-agend-barber",
             storageBucket: "projeto-agend-barber.firebasestorage.app",
             messagingSenderId: "368845787419",
-            appId: "1:368845787419:web:4eecbf361b2fe4d7e5c3be"
+            appId: "1:368845787419:web:cc902e9081e3a35cac2ae1"
         };
-
-        // =====================================================
-        // FIREBASE DO PAINEL (valida a licenca)
-        // =====================================================
-        const firebaseConfigPainel = {
-            apiKey: "AIzaSyDVg9GkKufgXp2orM9A4Hrxao3H0w5s1-U",
-            authDomain: "barber-hotmark.firebaseapp.com",
-            projectId: "barber-hotmark",
-            storageBucket: "barber-hotmark.firebasestorage.app",
-            messagingSenderId: "596707824864",
-            appId: "1:596707824864:web:dfd4162b1cf7157d91ec85"
-        };
-
-        // Inicializa os dois apps Firebase separados
-        const appCliente = firebase.initializeApp(firebaseConfig, "cliente");
-        const appPainel  = firebase.initializeApp(firebaseConfigPainel, "painel");
-        const db         = firebase.firestore(appCliente);
-        const dbPainel   = firebase.firestore(appPainel);
-
-        // =====================================================
-        // SISTEMA DE LICENCA
-        // =====================================================
-        const LICENCA_KEY = 'elnegrones_licenca_codigo';
-
-        async function verificarLicenca(codigo) {
-            try {
-                const snap = await dbPainel.collection("licencas")
-                    .where("codigo", "==", codigo.trim().toUpperCase())
-                    .where("status", "==", "ativo")
-                    .get();
-                return !snap.empty;
-            } catch(e) {
-                console.error("Erro ao verificar licenca:", e);
-                return false;
-            }
-        }
-
-        async function ativarLicenca() {
-            const input = document.getElementById('licenca-input');
-            const btn   = document.getElementById('licenca-btn');
-            const err   = document.getElementById('licenca-err');
-            const codigo = input.value.trim().toUpperCase();
-
-            if (!codigo) { err.textContent = "Digite o codigo de licenca."; return; }
-
-            btn.disabled = true;
-            btn.textContent = "VERIFICANDO...";
-            err.textContent = "";
-
-            const valido = await verificarLicenca(codigo);
-
-            if (valido) {
-                localStorage.setItem(LICENCA_KEY, codigo);
-                document.getElementById('tela-licenca').style.display = 'none';
-                document.getElementById('app-principal').style.display = 'block';
-                iniciarApp();
-            } else {
-                err.textContent = "Codigo invalido ou inativo. Contate o suporte.";
-                btn.disabled = false;
-                btn.textContent = "[ ATIVAR SISTEMA ]";
-            }
-        }
-
-        async function initApp() {
-            const codigoSalvo = localStorage.getItem(LICENCA_KEY);
-            if (codigoSalvo) {
-                const valido = await verificarLicenca(codigoSalvo);
-                if (valido) {
-                    document.getElementById('tela-licenca').style.display = 'none';
-                    document.getElementById('app-principal').style.display = 'block';
-                    iniciarApp();
-                    return;
-                } else {
-                    localStorage.removeItem(LICENCA_KEY);
-                }
-            }
-            document.getElementById('tela-licenca').style.display = 'flex';
-        }
-
-        function iniciarApp() {
-            carregarBarbeiros();
-            mascarar(document.getElementById('whatsapp-cliente'));
-            mascarar(document.getElementById('cancel-zap'));
-        }
-
-        initApp();
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
         let barbeirosData = [];
         let horarioSelecionado = null;
 
-        // window.onload substituido pelo sistema de licenca (initApp chama iniciarApp)
+        window.onload = () => {
+            carregarBarbeiros();
+            mascarar(document.getElementById('whatsapp-cliente'));
+            mascarar(document.getElementById('cancel-zap'));
+        };
 
         function mascarar(el) {
             el.addEventListener('input', (e) => {
@@ -1407,7 +1292,6 @@
     }
 }
     </script>
-</div><!-- fim app-principal -->
 </body>
 
 </html>

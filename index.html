@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>✂️ El Negrone's | Agendamento</title>
+    <title>✂️ Nome da sua barbearia aqui | Agendamento</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
@@ -526,7 +526,7 @@
     <div class="container">
         <div class="header">
             <img src="logo_insta.png" alt="Logo" class="logo-img">
-            <p>Rua Ramira Cabral, 73 - CENTRO JACAREÍ - SP</p>
+            <p id="txt-endereco-barbearia">Carregando...</p>
             <div class="social-header">
                 <a href="https://www.instagram.com/el_negrones" target="_blank"><i class="fab fa-instagram"></i></a>
                 <a href="https://wa.me/5512996025236" target="_blank"><i class="fab fa-whatsapp"></i></a>
@@ -592,6 +592,15 @@
             carregarBarbeiros();
             mascarar(document.getElementById('whatsapp-cliente'));
             mascarar(document.getElementById('cancel-zap'));
+            // Carrega endereço dinamicamente
+            db.collection("configuracao").doc("info").get().then(doc => {
+                const el = document.getElementById('txt-endereco-barbearia');
+                if (doc.exists && doc.data().endereco) {
+                    el.textContent = doc.data().endereco;
+                } else {
+                    el.textContent = "";
+                }
+            });
         };
 
         function mascarar(el) {

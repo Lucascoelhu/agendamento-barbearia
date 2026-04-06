@@ -454,7 +454,11 @@
                     <h3>Endereço da Barbearia</h3>
                     <label>Endereço exibido no site</label>
                     <input type="text" id="conf-endereco" placeholder="Ex: Rua das Flores, 123 - Centro - Cidade - SP">
-                    <button class="btn-action" onclick="salvarEndereco()">Salvar Endereço</button>
+                    <label>Instagram (só o usuário)</label>
+                    <input type="text" id="conf-instagram" placeholder="Ex: el_negrones">
+                    <label>WhatsApp (só números com DDD)</label>
+                    <input type="text" id="conf-whatsapp" placeholder="Ex: 5512996025236">
+                    <button class="btn-action" onclick="salvarInfoBarbearia()">Salvar</button>
                 </div>
 
                 <div class="card">
@@ -1310,17 +1314,21 @@ async function excluirBloqueioDireto(id) {
         }
     }
 
-    async function salvarEndereco() {
+    async function salvarInfoBarbearia() {
         const endereco = document.getElementById('conf-endereco').value.trim();
-        if (!endereco) return alert("Digite um endereço.");
-        await db.collection("configuracao").doc("info").set({ endereco }, { merge: true });
-        alert("Endereço salvo com sucesso!");
+        const instagram = document.getElementById('conf-instagram').value.trim().replace('@', '');
+        const whatsapp = document.getElementById('conf-whatsapp').value.trim().replace(/\D/g, '');
+        await db.collection("configuracao").doc("info").set({ endereco, instagram, whatsapp }, { merge: true });
+        alert("Informações salvas com sucesso!");
     }
 
     async function carregarEndereco() {
         const doc = await db.collection("configuracao").doc("info").get();
-        if (doc.exists && doc.data().endereco) {
-            document.getElementById('conf-endereco').value = doc.data().endereco;
+        if (doc.exists) {
+            const d = doc.data();
+            if (d.endereco) document.getElementById('conf-endereco').value = d.endereco;
+            if (d.instagram) document.getElementById('conf-instagram').value = d.instagram;
+            if (d.whatsapp) document.getElementById('conf-whatsapp').value = d.whatsapp;
         }
     }
 

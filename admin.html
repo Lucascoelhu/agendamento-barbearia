@@ -437,12 +437,28 @@
             </div>
             
                 <div id="tab-config" class="tab-content" style="display:none;">
+
+                <div class="card">
+                    <h3>Logo da Barbearia</h3>
+                    <label>Imagem atual</label>
+                    <div style="text-align:center; margin-bottom:15px;">
+                        <img id="preview-logo-admin" src="" alt="Logo" style="max-width:160px; max-height:160px; object-fit:contain; border-radius:12px; display:none; border:1px solid #333;">
+                        <p id="txt-sem-logo" style="color:#555; font-size:0.75rem;">Nenhuma logo salva.</p>
+                    </div>
+                    <label>Selecionar nova logo</label>
+                    <input type="file" id="input-logo" accept="image/*" onchange="previewLogo(event)" style="padding:12px;">
+                    <button class="btn-action" onclick="salvarLogo()">Salvar Logo</button>
+                </div>
+
                 <div class="card">
                     <h3>Endereço da Barbearia</h3>
                     <label>Endereço exibido no site</label>
                     <input type="text" id="conf-endereco" placeholder="Ex: Rua das Flores, 123 - Centro - Cidade - SP">
                     <button class="btn-action" onclick="salvarEndereco()">Salvar Endereço</button>
                 </div>
+
+                <div class="card">
+                    <div class="premium-badge">PREMIUM</div>
                     <h3>Assinatura</h3>
                     <p id="txt-restam" style="font-weight: 800; color: var(--primary); margin-bottom: 5px;">Calculando...</p>
                     <p id="txt-expira" style="font-size:0.75rem; color: var(--text-dim); margin-bottom: 15px; display:none;">⏳ Expira em: <span id="val-expira">—</span></p>
@@ -589,6 +605,7 @@ limparAgendamentosConcluidos();
         carregarAgenda();
         carregarConfigBot();
         carregarEndereco();
+        carregarLogo();
     };
 
     function toggleElement(el) { el.classList.toggle('active'); }
@@ -1254,6 +1271,44 @@ async function excluirBloqueioDireto(id) {
         alert("Erro na ativação: " + e.message); 
     }
 }
+
+    async function salvarLogo() {
+        const input = document.getElementById('input-logo');
+        if (!input.files[0]) return alert("Selecione uma imagem.");
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            const base64 = e.target.result;
+            await db.collection("configuracao").doc("info").set({ logo: base64 }, { merge: true });
+            document.getElementById('preview-logo-admin').src = base64;
+            document.getElementById('preview-logo-admin').style.display = 'block';
+            document.getElementById('txt-sem-logo').style.display = 'none';
+            alert("Logo salva com sucesso!");
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+
+    function previewLogo(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.getElementById('preview-logo-admin');
+            img.src = e.target.result;
+            img.style.display = 'block';
+            document.getElementById('txt-sem-logo').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function carregarLogo() {
+        const doc = await db.collection("configuracao").doc("info").get();
+        if (doc.exists && doc.data().logo) {
+            const img = document.getElementById('preview-logo-admin');
+            img.src = doc.data().logo;
+            img.style.display = 'block';
+            document.getElementById('txt-sem-logo').style.display = 'none';
+        }
+    }
 
     async function salvarEndereco() {
         const endereco = document.getElementById('conf-endereco').value.trim();

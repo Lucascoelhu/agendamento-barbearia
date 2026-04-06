@@ -1155,8 +1155,12 @@ async function excluirBloqueioDireto(id) {
     const dados = {
         nome: nome,
         servicos: servicos,
-        foto: fotoBase64 // Nova variável com a string da imagem
     };
+
+    // Só inclui a foto se uma nova imagem foi selecionada
+    if(fotoBase64) {
+        dados.foto = fotoBase64;
+    }
 
     if(id) {
         await db.collection("barbeiros").doc(id).update(dados);

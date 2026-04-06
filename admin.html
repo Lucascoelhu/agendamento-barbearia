@@ -436,9 +436,13 @@
                 <div id="render-folgas"></div>
             </div>
             
-                    <div id="tab-config" class="tab-content" style="display:none;">
+                <div id="tab-config" class="tab-content" style="display:none;">
                 <div class="card">
-                    <div class="premium-badge">PREMIUM</div>
+                    <h3>Endereço da Barbearia</h3>
+                    <label>Endereço exibido no site</label>
+                    <input type="text" id="conf-endereco" placeholder="Ex: Rua das Flores, 123 - Centro - Cidade - SP">
+                    <button class="btn-action" onclick="salvarEndereco()">Salvar Endereço</button>
+                </div>
                     <h3>Assinatura</h3>
                     <p id="txt-restam" style="font-weight: 800; color: var(--primary); margin-bottom: 5px;">Calculando...</p>
                     <p id="txt-expira" style="font-size:0.75rem; color: var(--text-dim); margin-bottom: 15px; display:none;">⏳ Expira em: <span id="val-expira">—</span></p>
@@ -584,6 +588,7 @@ limparAgendamentosConcluidos();
         carregarEquipe();
         carregarAgenda();
         carregarConfigBot();
+        carregarEndereco();
     };
 
     function toggleElement(el) { el.classList.toggle('active'); }
@@ -1249,6 +1254,20 @@ async function excluirBloqueioDireto(id) {
         alert("Erro na ativação: " + e.message); 
     }
 }
+
+    async function salvarEndereco() {
+        const endereco = document.getElementById('conf-endereco').value.trim();
+        if (!endereco) return alert("Digite um endereço.");
+        await db.collection("configuracao").doc("info").set({ endereco }, { merge: true });
+        alert("Endereço salvo com sucesso!");
+    }
+
+    async function carregarEndereco() {
+        const doc = await db.collection("configuracao").doc("info").get();
+        if (doc.exists && doc.data().endereco) {
+            document.getElementById('conf-endereco').value = doc.data().endereco;
+        }
+    }
 
     async function salvarConfigBot() {
         const token = document.getElementById('conf-telegram-token').value;

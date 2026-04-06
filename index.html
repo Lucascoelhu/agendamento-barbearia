@@ -528,8 +528,8 @@
             <img id="logo-barbearia" src="logo_insta.png" alt="Logo" class="logo-img">
             <p id="txt-endereco-barbearia">Carregando...</p>
             <div class="social-header">
-                <a href="https://www.instagram.com/el_negrones" target="_blank"><i class="fab fa-instagram"></i></a>
-                <a href="https://wa.me/5512996025236" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                <a id="link-instagram" href="https://www.instagram.com/el_negrones" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a id="link-whatsapp" href="https://wa.me/5512996025236" target="_blank"><i class="fab fa-whatsapp"></i></a>
             </div>
         </div>
 
@@ -599,6 +599,8 @@
                     if (data.endereco) document.getElementById('txt-endereco-barbearia').textContent = data.endereco;
                     else document.getElementById('txt-endereco-barbearia').textContent = "";
                     if (data.logo) document.getElementById('logo-barbearia').src = data.logo;
+                    if (data.instagram) document.getElementById('link-instagram').href = `https://www.instagram.com/${data.instagram}`;
+                    if (data.whatsapp) document.getElementById('link-whatsapp').href = `https://wa.me/${data.whatsapp}`;
                 } else {
                     document.getElementById('txt-endereco-barbearia').textContent = "";
                 }

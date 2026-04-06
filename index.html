@@ -525,7 +525,7 @@
 
     <div class="container">
         <div class="header">
-            <img src="logo_insta.png" alt="Logo" class="logo-img">
+            <img id="logo-barbearia" src="logo_insta.png" alt="Logo" class="logo-img">
             <p id="txt-endereco-barbearia">Carregando...</p>
             <div class="social-header">
                 <a href="https://www.instagram.com/el_negrones" target="_blank"><i class="fab fa-instagram"></i></a>
@@ -592,13 +592,15 @@
             carregarBarbeiros();
             mascarar(document.getElementById('whatsapp-cliente'));
             mascarar(document.getElementById('cancel-zap'));
-            // Carrega endereço dinamicamente
+            // Carrega logo e endereço dinamicamente
             db.collection("configuracao").doc("info").get().then(doc => {
-                const el = document.getElementById('txt-endereco-barbearia');
-                if (doc.exists && doc.data().endereco) {
-                    el.textContent = doc.data().endereco;
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.endereco) document.getElementById('txt-endereco-barbearia').textContent = data.endereco;
+                    else document.getElementById('txt-endereco-barbearia').textContent = "";
+                    if (data.logo) document.getElementById('logo-barbearia').src = data.logo;
                 } else {
-                    el.textContent = "";
+                    document.getElementById('txt-endereco-barbearia').textContent = "";
                 }
             });
         };

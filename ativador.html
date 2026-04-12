@@ -160,20 +160,52 @@
 <div class="terminal" id="main-terminal">
     <div class="terminal-header">
         <span>EN_SYSTEM_OS [v4.0.2]</span>
-        <span>SECURED</span>
+        <span id="tab-indicator">// GEN_MODE</span>
     </div>
 
-    <h2>MASTER_GEN</h2>
-    <div class="status">> INICIALIZANDO PROTOCOLO_KEY...</div>
+    <!-- Tab buttons -->
+    <div style="display:flex; gap:8px; margin-bottom:20px;">
+        <button id="btn-tab-gen" onclick="switchTab('gen')" style="flex:1; padding:8px; font-size:0.65rem; background: var(--primary); color:#000; border-color: var(--primary);">[ GERAR_CHAVE ]</button>
+        <button id="btn-tab-cfg" onclick="switchTab('cfg')" style="flex:1; padding:8px; font-size:0.65rem; background: transparent; color: var(--primary);">[ CONFIG_SYS ]</button>
+    </div>
 
-    <button onclick="gerarCodigo()">[ GERAR_CHAVE_UNICA ]</button>
+    <!-- Seção: Gerar Código -->
+    <div id="section-gen">
+        <h2>MASTER_GEN</h2>
+        <div class="status">> INICIALIZANDO PROTOCOLO_KEY...</div>
+        <button onclick="gerarCodigo()">[ GERAR_CHAVE_UNICA ]</button>
+        <div id="output-zone" class="output-zone">
+            <div id="resultado" class="code-box" onclick="copiarCodigo()"></div>
+            <div class="log" id="log-text">
+                > CONEXÃO ESTABELECIDA COM FIREBASE...<br>
+                > STATUS: AGUARDANDO ATIVAÇÃO NO PAINEL CLIENTE...<br>
+                > SEGURANÇA: APENAS CÓDIGOS DESTA SESSÃO SÃO VÁLIDOS.
+            </div>
+        </div>
+    </div>
 
-    <div id="output-zone" class="output-zone">
-        <div id="resultado" class="code-box" onclick="copiarCodigo()"></div>
-        <div class="log" id="log-text">
-            > CONEXÃO ESTABELECIDA COM FIREBASE...<br>
-            > STATUS: AGUARDANDO ATIVAÇÃO NO PAINEL CLIENTE...<br>
-            > SEGURANÇA: APENAS CÓDIGOS DESTA SESSÃO SÃO VÁLIDOS.
+    <!-- Seção: Configurações -->
+    <div id="section-cfg" style="display:none;">
+        <h2 style="font-size:1rem; margin-bottom:4px;">CONFIG_SYS</h2>
+        <div class="status">> PARÂMETROS DO SISTEMA...</div>
+
+        <div style="margin-bottom: 20px;">
+            <div class="log" style="margin-top:0; margin-bottom:8px; color:#555;">> CHAVE_PIX_ATUAL:</div>
+            <div id="pix-atual" style="padding:10px; background:#000; border:1px solid #222; color: var(--primary); font-size:0.8rem; word-break:break-all; min-height:36px;">
+                <span style="color:#333;">carregando...</span>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+            <div class="log" style="margin-top:0; margin-bottom:8px; color:#555;">> NOVA_CHAVE_PIX:</div>
+            <input type="text" id="pix-input" placeholder="email, telefone ou CPF..."
+                style="width:100%; padding:10px; font-size:0.8rem; margin-bottom:0; color: var(--primary);">
+        </div>
+
+        <button onclick="salvarPix()">[ SALVAR_CHAVE_PIX ]</button>
+
+        <div id="pix-feedback" style="display:none; margin-top:12px;" class="log">
+            > STATUS: CHAVE_PIX ATUALIZADA COM SUCESSO. ✓
         </div>
     </div>
 </div>
@@ -230,20 +262,53 @@
     function copiarCodigo() {
         const texto = document.getElementById('resultado').innerText;
         if(!texto) return;
-
         navigator.clipboard.writeText(texto).then(() => {
             const res = document.getElementById('resultado');
             const originalColor = res.style.color;
-            
             res.style.color = "#00ff88";
             res.style.borderColor = "#00ff88";
-            
             setTimeout(() => { 
                 res.style.color = originalColor;
                 res.style.borderColor = "var(--primary-glow)";
                 alert("CHAVE COPIADA COM SUCESSO!");
             }, 300);
         });
+    }
+
+    // ===== ABAS =====
+    function switchTab(tab) {
+        const isGen = tab === 'gen';
+        document.getElementById('section-gen').style.display = isGen ? 'block' : 'none';
+        document.getElementById('section-cfg').style.display = isGen ? 'none' : 'block';
+        document.getElementById('tab-indicator').textContent = isGen ? '// GEN_MODE' : '// CFG_MODE';
+        document.getElementById('btn-tab-gen').style.background = isGen ? 'var(--primary)' : 'transparent';
+        document.getElementById('btn-tab-gen').style.color      = isGen ? '#000' : 'var(--primary)';
+        document.getElementById('btn-tab-cfg').style.background = isGen ? 'transparent' : 'var(--primary)';
+        document.getElementById('btn-tab-cfg').style.color      = isGen ? 'var(--primary)' : '#000';
+        if(!isGen) loadPix();
+    }
+
+    // ===== CHAVE PIX =====
+    async function loadPix() {
+        const el = document.getElementById('pix-atual');
+        try {
+            const doc = await db.collection('configuracao').doc('config').get();
+            el.textContent = doc.exists && doc.data().pixKey ? doc.data().pixKey : 'Não configurada';
+            el.style.color = 'var(--primary)';
+        } catch(e) { el.textContent = 'ERRO: ' + e.message; }
+    }
+
+    async function salvarPix() {
+        const val = document.getElementById('pix-input').value.trim();
+        if(!val) { alert('ERRO: Digite a nova chave PIX!'); return; }
+        try {
+            await db.collection('configuracao').doc('config').set({ pixKey: val }, { merge: true });
+            document.getElementById('pix-atual').textContent = val;
+            document.getElementById('pix-input').value = '';
+            const fb = document.getElementById('pix-feedback');
+            fb.style.display = 'block';
+            setTimeout(() => fb.style.display = 'none', 3000);
+        } catch(e) { alert('ERRO_SISTEMA: ' + e.message); }
     }
 </script>
 </body>

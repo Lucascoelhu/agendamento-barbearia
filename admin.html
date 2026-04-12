@@ -474,7 +474,7 @@
                 <h3>Renovação</h3>
                 <label>Chave E-mail (Toque para copiar)</label>
                 <input type="text" id="pix-copia-cola" readonly 
-                       value="LukCoelhu@hotmail.com" 
+                       value="Carregando..." 
                        onclick="copiarPix()"
                        style="font-size: 0.9rem; text-align: center; border: 1px solid var(--primary); cursor: pointer; font-weight: 700; color: var(--primary);">
                 
@@ -516,7 +516,15 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // --- FUNÇÃO DE LIMPEZA APRIMORADA ---
+    // Carrega chave PIX do Firebase
+    async function loadPixKey() {
+        try {
+            const doc = await db.collection('configuracao').doc('config').get();
+            const pix = doc.exists && doc.data().pixKey ? doc.data().pixKey : 'LukCoelhu@hotmail.com';
+            document.getElementById('pix-copia-cola').value = pix;
+        } catch(e) { console.log('Erro ao carregar PIX:', e); }
+    }
+    loadPixKey();
 async function limparAgendamentosConcluidos() {
     // 1. Obtém o momento exato ATUAL no fuso de Brasília
     const agora = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));

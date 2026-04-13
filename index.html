@@ -598,7 +598,7 @@
             </div>`;
             throw new Error('ID não informado');
         }
-        _db.collection('clientes').doc(_clienteId).get().then(snap => {
+        _db.collection('clientes').doc(_clienteId).get().then(async snap => {
             if (!snap.exists || !snap.data().ativo) {
                 document.body.innerHTML = `
                 <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a0a;font-family:Inter,sans-serif;text-align:center;padding:20px">
@@ -609,7 +609,22 @@
                     </div>
                 </div>`;
             } else {
-                if (snap.data().nome) document.title = '✂️ ' + snap.data().nome + ' | Agendamento';
+                // Prioriza nome salvo na configuração interna
+                try {
+                    const cfgSnap = await _db.collection('clientes').doc(_clienteId)
+                        .collection('configuracao').doc('info').get();
+                    const nomeInterno = cfgSnap.exists && cfgSnap.data().nomeBarbearia
+                        ? cfgSnap.data().nomeBarbearia : snap.data().nome;
+                    if (nomeInterno) {
+                        document.title = '✂️ ' + nomeInterno + ' | Agendamento';
+                        // Atualiza elementos de nome no HTML se existirem
+                        document.querySelectorAll('.nome-barbearia-dinamico').forEach(el => {
+                            el.textContent = nomeInterno;
+                        });
+                    }
+                } catch(e) {
+                    if (snap.data().nome) document.title = '✂️ ' + snap.data().nome + ' | Agendamento';
+                }
             }
         });
         const db = { collection: (col) => _db.collection('clientes').doc(_clienteId).collection(col) };

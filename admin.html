@@ -274,9 +274,53 @@
 </head>
 <body>
 
+<!-- ══════════════════════════════════════
+     TELA DE LOGIN
+══════════════════════════════════════ -->
+<div id="login-screen" style="
+    position:fixed;inset:0;z-index:9999;
+    background:#0a0a0a;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Inter',sans-serif;padding:20px;">
+    <div style="
+        background:#141414;border:1px solid #2a2a2a;border-radius:20px;
+        padding:36px 28px;width:100%;max-width:380px;
+        box-shadow:0 20px 60px rgba(0,0,0,.6);text-align:center;">
+        <div id="login-logo-wrap" style="margin-bottom:16px;">
+            <img id="login-logo" src="" alt="" style="max-width:80px;max-height:80px;object-fit:contain;border-radius:12px;display:none;">
+            <div id="login-logo-placeholder" style="font-size:48px;">💈</div>
+        </div>
+        <h2 id="login-nome-barbearia" style="
+            font-family:'Cinzel',serif;color:#c5a059;
+            font-size:1.3rem;letter-spacing:3px;margin:0 0 4px 0;">
+            CARREGANDO...
+        </h2>
+        <p style="color:#444;font-size:0.75rem;margin:0 0 28px 0;">PAINEL ADMINISTRATIVO</p>
+        <div style="text-align:left;margin-bottom:16px;">
+            <label style="display:block;font-size:0.7rem;font-weight:700;color:#666;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">Senha de Acesso</label>
+            <input type="password" id="login-senha" placeholder="••••••••"
+                style="width:100%;padding:14px;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:10px;color:#fff;font-family:Inter,sans-serif;font-size:1rem;"
+                onkeydown="if(event.key==='Enter') fazerLogin()">
+        </div>
+        <div id="login-erro" style="display:none;color:#ff4d4d;font-size:0.75rem;margin-bottom:12px;background:#1a0a0a;padding:8px;border-radius:8px;border:1px solid #3a1010;">
+            ❌ Senha incorreta. Tente novamente.
+        </div>
+        <button onclick="fazerLogin()" style="
+            width:100%;padding:15px;background:linear-gradient(135deg,#c5a059,#a68549);
+            color:#000;font-weight:800;font-size:0.9rem;border:none;border-radius:10px;
+            cursor:pointer;font-family:Inter,sans-serif;letter-spacing:1px;">
+            ENTRAR
+        </button>
+        <p style="color:#333;font-size:0.65rem;margin-top:16px;">Acesso exclusivo ao administrador</p>
+    </div>
+</div>
 
-<div id="main-app">
+<div id="main-app" style="display:none;">
     <div class="top-nav-container">
+        <!-- Nome da barbearia no topo -->
+        <div style="text-align:center;padding:6px 0 2px 0;">
+            <span id="topbar-nome-barbearia" style="font-family:'Cinzel',serif;color:#c5a059;font-size:0.8rem;letter-spacing:2px;font-weight:700;opacity:0.8;"></span>
+        </div>
         <div class="tab-bar">
             <div class="tab-btn active" onclick="switchTab('agenda', this)"><span>📅</span><span>AGENDA</span></div>
             <div class="tab-btn" onclick="switchTab('atendimento', this)"><span>✅</span><span>DATAS</span></div>
@@ -439,6 +483,25 @@
                 <div id="tab-config" class="tab-content" style="display:none;">
 
                 <div class="card">
+                    <h3>🏪 Nome da Barbearia</h3>
+                    <label>Nome exibido no sistema</label>
+                    <input type="text" id="conf-nome-barbearia" placeholder="Ex: Barbearia do João">
+                    <button class="btn-action" onclick="salvarNomeBarbearia()">Salvar Nome</button>
+                </div>
+
+                <div class="card">
+                    <h3>🔐 Alterar Senha de Acesso</h3>
+                    <label>Senha atual</label>
+                    <input type="password" id="conf-senha-atual" placeholder="••••••••">
+                    <label>Nova senha</label>
+                    <input type="password" id="conf-senha-nova" placeholder="••••••••">
+                    <label>Confirmar nova senha</label>
+                    <input type="password" id="conf-senha-confirma" placeholder="••••••••">
+                    <button class="btn-action" onclick="alterarSenha()">Alterar Senha</button>
+                    <div id="msg-senha" style="display:none;margin-top:8px;padding:10px;border-radius:8px;font-size:0.8rem;font-weight:700;text-align:center;"></div>
+                </div>
+
+                <div class="card">
                     <h3>Logo da Barbearia</h3>
                     <label>Imagem atual</label>
                     <div style="text-align:center; margin-bottom:15px;">
@@ -530,7 +593,7 @@
         throw new Error('ID do cliente não informado na URL');
     }
 
-    // Verifica se o cliente existe e está ativo
+    // Verifica se o cliente existe e está ativo, carrega nome e logo
     _db.collection('clientes').doc(_clienteId).get().then(snap => {
         if (!snap.exists || !snap.data().ativo) {
             document.body.innerHTML = `
@@ -542,14 +605,148 @@
                 </div>
             </div>`;
         } else {
-            // Atualiza o título com o nome da barbearia
-            if (snap.data().nome) document.title = '💈 Admin | ' + snap.data().nome;
+            const nome = snap.data().nome || 'BARBEARIA';
+            document.title = '💈 Admin | ' + nome;
+            // Preenche nome na tela de login
+            const elNome = document.getElementById('login-nome-barbearia');
+            if (elNome) elNome.textContent = nome;
+            const elTop = document.getElementById('topbar-nome-barbearia');
+            if (elTop) elTop.textContent = nome;
         }
     });
 
     // Proxy do db que prefixa todas as coleções com clientes/{id}/
     const db = {
         collection: (col) => _db.collection('clientes').doc(_clienteId).collection(col)
+    };
+
+    // ══════════════════════════════════════
+    // SISTEMA DE LOGIN COM SENHA
+    // ══════════════════════════════════════
+    const SENHA_PADRAO = 'barber123';
+    const SESSION_KEY  = 'adm_auth_' + _clienteId;
+
+    // Verifica se já tem sessão ativa nesta aba
+    if (sessionStorage.getItem(SESSION_KEY) === 'ok') {
+        mostrarApp();
+    } else {
+        carregarLogoLogin();
+    }
+
+    function mostrarApp() {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        // Carrega nome no input de config quando entrar
+        setTimeout(carregarNomeBarbeariaInput, 800);
+    }
+
+    async function carregarLogoLogin() {
+        try {
+            const doc = await db.collection('configuracao').doc('info').get();
+            if (doc.exists && doc.data().logo) {
+                const img = document.getElementById('login-logo');
+                const ph  = document.getElementById('login-logo-placeholder');
+                img.src = doc.data().logo;
+                img.style.display = 'block';
+                if (ph) ph.style.display = 'none';
+            }
+            if (doc.exists && doc.data().nomeBarbearia) {
+                const el = document.getElementById('login-nome-barbearia');
+                if (el) el.textContent = doc.data().nomeBarbearia.toUpperCase();
+            }
+        } catch(e) {}
+    }
+
+    window.fazerLogin = async function() {
+        const digitado = document.getElementById('login-senha').value;
+        const erroEl   = document.getElementById('login-erro');
+        erroEl.style.display = 'none';
+
+        try {
+            // Busca senha salva no Firestore
+            const cfgDoc = await db.collection('configuracao').doc('acesso').get();
+            const senhaCorreta = (cfgDoc.exists && cfgDoc.data().senha) ? cfgDoc.data().senha : SENHA_PADRAO;
+
+            if (digitado === senhaCorreta) {
+                sessionStorage.setItem(SESSION_KEY, 'ok');
+                mostrarApp();
+            } else {
+                erroEl.style.display = 'block';
+                document.getElementById('login-senha').value = '';
+                document.getElementById('login-senha').focus();
+            }
+        } catch(e) {
+            // Fallback para senha padrão se falhar conexão
+            if (digitado === SENHA_PADRAO) {
+                sessionStorage.setItem(SESSION_KEY, 'ok');
+                mostrarApp();
+            } else {
+                erroEl.style.display = 'block';
+            }
+        }
+    };
+
+    // ══════════════════════════════════════
+    // NOME DA BARBEARIA
+    // ══════════════════════════════════════
+    async function carregarNomeBarbeariaInput() {
+        try {
+            const doc = await db.collection('configuracao').doc('info').get();
+            const nome = doc.exists && doc.data().nomeBarbearia ? doc.data().nomeBarbearia : '';
+            const inp = document.getElementById('conf-nome-barbearia');
+            if (inp) inp.value = nome;
+        } catch(e) {}
+    }
+
+    window.salvarNomeBarbearia = async function() {
+        const nome = document.getElementById('conf-nome-barbearia').value.trim();
+        if (!nome) { alert('Digite o nome da barbearia!'); return; }
+        try {
+            await db.collection('configuracao').doc('info').set({ nomeBarbearia: nome }, { merge: true });
+            // Atualiza também no documento do cliente (ativador)
+            await _db.collection('clientes').doc(_clienteId).update({ nome: nome });
+            document.title = '💈 Admin | ' + nome;
+            const elTop = document.getElementById('topbar-nome-barbearia');
+            if (elTop) elTop.textContent = nome;
+            const elLogin = document.getElementById('login-nome-barbearia');
+            if (elLogin) elLogin.textContent = nome.toUpperCase();
+            alert('✅ Nome salvo com sucesso!');
+        } catch(e) { alert('Erro ao salvar: ' + e.message); }
+    };
+
+    // ══════════════════════════════════════
+    // ALTERAR SENHA
+    // ══════════════════════════════════════
+    window.alterarSenha = async function() {
+        const atual    = document.getElementById('conf-senha-atual').value;
+        const nova     = document.getElementById('conf-senha-nova').value;
+        const confirma = document.getElementById('conf-senha-confirma').value;
+        const msgEl    = document.getElementById('msg-senha');
+
+        const mostrarMsg = (txt, ok) => {
+            msgEl.textContent = txt;
+            msgEl.style.display = 'block';
+            msgEl.style.background = ok ? '#0a2a0a' : '#2a0a0a';
+            msgEl.style.color = ok ? '#00ff88' : '#ff4d4d';
+            msgEl.style.border = '1px solid ' + (ok ? '#1a5a1a' : '#5a1a1a');
+        };
+
+        if (!atual || !nova || !confirma) { mostrarMsg('Preencha todos os campos.', false); return; }
+        if (nova !== confirma)            { mostrarMsg('A nova senha e a confirmação não coincidem.', false); return; }
+        if (nova.length < 4)              { mostrarMsg('A nova senha deve ter pelo menos 4 caracteres.', false); return; }
+
+        try {
+            const cfgDoc = await db.collection('configuracao').doc('acesso').get();
+            const senhaAtual = (cfgDoc.exists && cfgDoc.data().senha) ? cfgDoc.data().senha : SENHA_PADRAO;
+
+            if (atual !== senhaAtual) { mostrarMsg('Senha atual incorreta.', false); return; }
+
+            await db.collection('configuracao').doc('acesso').set({ senha: nova }, { merge: true });
+            mostrarMsg('✅ Senha alterada com sucesso!', true);
+            document.getElementById('conf-senha-atual').value = '';
+            document.getElementById('conf-senha-nova').value = '';
+            document.getElementById('conf-senha-confirma').value = '';
+        } catch(e) { mostrarMsg('Erro: ' + e.message, false); }
     };
 
     // Carrega chave PIX do Firebase

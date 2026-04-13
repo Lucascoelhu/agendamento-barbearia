@@ -514,7 +514,43 @@
         appId: "1:368845787419:web:cc902e9081e3a35cac2ae1"
     };
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const _db = firebase.firestore();
+
+    // ── MULTI-TENANT: lê o ID do cliente pela URL ──
+    const _clienteId = new URLSearchParams(window.location.search).get('id');
+    if (!_clienteId) {
+        document.body.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a0a;font-family:Inter,sans-serif;text-align:center;padding:20px">
+            <div>
+                <div style="font-size:48px;margin-bottom:16px">⛔</div>
+                <div style="color:#c5a059;font-size:20px;font-weight:800;margin-bottom:8px">LINK INVÁLIDO</div>
+                <div style="color:#666;font-size:14px">Este link não contém um ID de barbearia válido.<br>Verifique o link enviado pelo administrador.</div>
+            </div>
+        </div>`;
+        throw new Error('ID do cliente não informado na URL');
+    }
+
+    // Verifica se o cliente existe e está ativo
+    _db.collection('clientes').doc(_clienteId).get().then(snap => {
+        if (!snap.exists || !snap.data().ativo) {
+            document.body.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a0a;font-family:Inter,sans-serif;text-align:center;padding:20px">
+                <div>
+                    <div style="font-size:48px;margin-bottom:16px">🔒</div>
+                    <div style="color:#c5a059;font-size:20px;font-weight:800;margin-bottom:8px">ACESSO BLOQUEADO</div>
+                    <div style="color:#666;font-size:14px">Esta barbearia não está ativa.<br>Entre em contato com o suporte.</div>
+                </div>
+            </div>`;
+        } else {
+            // Atualiza o título com o nome da barbearia
+            if (snap.data().nome) document.title = '💈 Admin | ' + snap.data().nome;
+        }
+    });
+
+    // Proxy do db que prefixa todas as coleções com clientes/{id}/
+    const db = {
+        collection: (col) => _db.collection('clientes').doc(_clienteId).collection(col)
+    };
 
     // Carrega chave PIX do Firebase
     async function loadPixKey() {

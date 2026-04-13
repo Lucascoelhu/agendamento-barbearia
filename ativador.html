@@ -6,17 +6,19 @@
     <title>Terminal | Root Access</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         :root {
             --primary: #c5a059;
-            --primary-glow: rgba(197, 160, 89, 0.4);
-            --bg: #050505;
-            --terminal-bg: #0a0a0a;
-            --border: #1a1a1a;
-            --text: #e0e0e0;
+            --primary-glow: rgba(197, 160, 89, 0.35);
+            --bg: #0d0d0d;
+            --terminal-bg: #141414;
+            --border: #2a2a2a;
+            --text: #f0f0f0;
+            --text2: #aaaaaa;
+            --text3: #666666;
         }
 
         html { height: 100%; }
@@ -24,7 +26,7 @@
         body { 
             background: var(--bg); 
             color: var(--text); 
-            font-family: 'Fira Code', monospace; 
+            font-family: 'Inter', sans-serif;
             display: flex; 
             align-items: flex-start; 
             justify-content: center; 
@@ -54,45 +56,57 @@
             z-index: 30;
             text-align: center;
             width: 100%;
-            max-width: 360px;
-            padding: 20px;
+            max-width: 380px;
+            padding: 32px 24px;
+            background: var(--terminal-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 8px 40px rgba(0,0,0,.8);
         }
-        #login-screen h2 { font-size: 1.2rem; margin-bottom: 24px; }
+        #login-screen h2 { font-size: 1.3rem; margin-bottom: 8px; }
+        #login-screen p { color: var(--text3); font-size: 0.8rem; margin-bottom: 24px; }
         #login-screen input {
             width: 100%;
             font-size: 1rem;
             padding: 14px;
             margin-bottom: 14px;
-            border-radius: 4px;
+            border-radius: 8px;
+            text-align: center;
+            letter-spacing: 4px;
         }
         #login-screen button {
-            width: auto;
-            padding: 13px 32px;
-            font-size: 0.85rem;
-            min-height: 48px;
-            border-radius: 4px;
+            width: 100%;
+            padding: 14px 32px;
+            font-size: 0.88rem;
+            min-height: 50px;
+            border-radius: 8px;
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
         }
 
         /* ── TERMINAL ── */
         .terminal { 
             background: var(--terminal-bg); 
-            padding: 20px 16px;
-            border-radius: 6px; 
+            padding: 22px 18px;
+            border-radius: 14px; 
             border: 1px solid var(--border); 
             width: 100%;
             max-width: 560px; 
             position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,1);
+            box-shadow: 0 8px 40px rgba(0,0,0,.8);
             z-index: 20;
             display: none;
         }
 
         .terminal-header {
-            color: var(--primary);
-            font-size: 0.65rem;
-            margin-bottom: 16px;
+            color: var(--text3);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 18px;
             border-bottom: 1px solid var(--border);
-            padding-bottom: 10px;
+            padding-bottom: 12px;
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
@@ -102,47 +116,50 @@
         h2 { 
             font-family: 'Cinzel', serif; 
             color: var(--primary); 
-            margin: 0 0 4px 0;
-            font-size: 1.1rem;
+            margin: 0 0 6px 0;
+            font-size: 1.15rem;
+            font-weight: 700;
             letter-spacing: 3px;
-            text-shadow: 0 0 10px var(--primary-glow);
+            text-shadow: 0 0 14px var(--primary-glow);
         }
 
-        .status { font-size: 0.6rem; color: #444; margin-bottom: 20px; }
+        .status { font-size: 0.72rem; color: var(--text3); margin-bottom: 20px; font-weight: 500; letter-spacing: 0.3px; }
 
         /* ── INPUTS GLOBAIS ── */
         input {
-            background: #000;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            padding: 12px;
-            font-family: 'Fira Code', monospace;
-            font-size: 0.9rem; /* evita zoom no iOS */
+            background: #1a1a1a;
+            border: 1px solid #2e2e2e;
+            color: var(--text);
+            padding: 12px 14px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.92rem;
             outline: none;
-            text-align: center;
+            text-align: left;
             margin-bottom: 10px;
-            border-radius: 3px;
+            border-radius: 8px;
             -webkit-appearance: none;
             width: 100%;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
-        input::placeholder { color: #333; }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 8px var(--primary-glow); }
+        input::placeholder { color: #555; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); background: #1f1f1f; }
 
         /* ── BOTÕES ── */
         button { 
             background: transparent; 
             border: 1px solid var(--primary); 
-            padding: 13px 10px;
-            min-height: 46px; /* área de toque mínima */
+            padding: 13px 14px;
+            min-height: 48px;
             width: 100%; 
             color: var(--primary);
-            font-family: 'Fira Code', monospace;
-            font-size: 0.75rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.82rem;
             font-weight: 700; 
             cursor: pointer; 
             transition: all 0.2s;
             text-transform: uppercase;
-            border-radius: 3px;
+            letter-spacing: 0.8px;
+            border-radius: 8px;
             -webkit-appearance: none;
         }
         button:active {
@@ -154,13 +171,13 @@
             button:hover {
                 background: var(--primary);
                 color: #000;
-                box-shadow: 0 0 15px var(--primary-glow);
+                box-shadow: 0 0 16px var(--primary-glow);
             }
         }
 
         /* ── TABS ── */
-        .tabs-wrap { display: flex; gap: 8px; margin-bottom: 20px; }
-        .tabs-wrap button { padding: 11px 8px; font-size: 0.7rem; }
+        .tabs-wrap { display: flex; gap: 8px; margin-bottom: 24px; }
+        .tabs-wrap button { padding: 12px 8px; font-size: 0.78rem; font-weight: 700; }
 
         /* ── CODE BOX ── */
         .code-box { 
@@ -190,10 +207,11 @@
         .output-zone { margin-top: 24px; display: none; }
 
         .log {
-            font-size: 0.6rem;
-            color: #333;
+            font-size: 0.72rem;
+            color: var(--text3);
             margin-top: 24px;
-            line-height: 1.6;
+            line-height: 1.7;
+            font-weight: 500;
         }
 
         /* ── LISTA CLIENTES ── */
@@ -227,20 +245,20 @@
             .modal-box { border-radius: 8px; }
         }
         .modal-box h3 {
-            color: var(--primary); font-size: 0.8rem;
-            margin: 0 0 4px 0; letter-spacing: 2px;
+            color: var(--primary); font-size: 0.88rem;
+            margin: 0 0 4px 0; letter-spacing: 2px; font-weight: 700;
         }
         .modal-box label {
-            display: block; font-size: 0.6rem; color: #555;
-            margin-bottom: 5px; margin-top: 14px;
+            display: block; font-size: 0.72rem; color: var(--text2);
+            font-weight: 600; margin-bottom: 6px; margin-top: 14px;
         }
         .modal-box input, .modal-box select {
             width: 100%; padding: 13px 12px;
-            background: #000; border: 1px solid #333;
-            color: var(--primary);
-            font-family: 'Fira Code', monospace;
-            font-size: 0.9rem; /* evita zoom iOS */
-            border-radius: 3px;
+            background: #1a1a1a; border: 1px solid #2e2e2e;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.92rem;
+            border-radius: 8px;
             -webkit-appearance: none;
         }
         .modal-box select {
@@ -257,8 +275,9 @@
         .btn-cancel-modal:active { background: #111 !important; color: #888 !important; box-shadow: none !important; }
 
         /* ── CAMPOS DA SEÇÃO CLIENTES ── */
-        #section-cfg input { text-align: left; font-size: 0.9rem; }
-        #section-cfg button { font-size: 0.72rem; }
+        #section-cfg input { text-align: left; font-size: 0.92rem; }
+        #section-cfg button { font-size: 0.78rem; }
+        .sec-label { display:block; font-size:0.72rem; font-weight:600; color:var(--text2); margin-bottom:6px; margin-top:2px; letter-spacing:0.3px; }
 
         /* ── MODAL DETALHES CLIENTE ── */
         .modal-detalhes {
@@ -297,10 +316,10 @@
         }
         .det-nome {
             font-family: 'Cinzel', serif;
-            color: var(--primary); font-size: 1rem;
-            letter-spacing: 2px; margin: 0 0 2px 0;
+            color: var(--primary); font-size: 1.05rem;
+            letter-spacing: 2px; margin: 0 0 4px 0; font-weight: 700;
         }
-        .det-sub { font-size: 0.6rem; color: #555; }
+        .det-sub { font-size: 0.75rem; color: var(--text2); font-weight: 500; }
         .det-body { padding: 16px 18px 32px; }
         .det-section {
             border: 1px solid #1a1a1a;
@@ -309,12 +328,14 @@
             overflow: hidden;
         }
         .det-section-title {
-            background: #0f0f0a;
-            padding: 8px 12px;
-            font-size: 0.6rem;
-            color: #666;
-            letter-spacing: 1px;
-            border-bottom: 1px solid #1a1a1a;
+            background: #1a1a1a;
+            padding: 9px 14px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text2);
+            letter-spacing: 0.8px;
+            border-bottom: 1px solid var(--border);
+            text-transform: uppercase;
         }
         .det-section-body { padding: 12px; }
         .det-row {
@@ -322,10 +343,10 @@
             gap: 8px; margin-bottom: 8px;
         }
         .det-row:last-child { margin-bottom: 0; }
-        .det-label { font-size: 0.58rem; color: #444; min-width: 60px; }
+        .det-label { font-size: 0.7rem; color: var(--text2); min-width: 64px; font-weight: 600; }
         .det-val {
-            flex: 1; font-size: 0.7rem; color: var(--primary);
-            word-break: break-all; line-height: 1.4;
+            flex: 1; font-size: 0.72rem; color: var(--text);
+            word-break: break-all; line-height: 1.5;
         }
         .det-copy-btn {
             padding: 5px 8px !important; min-height: 32px !important;
@@ -335,32 +356,32 @@
         }
         .det-copy-btn:active { background: #1a1a0a !important; }
         .det-input {
-            width: 100%; padding: 11px 12px;
-            background: #000; border: 1px solid #222;
-            color: var(--primary); font-family: 'Fira Code', monospace;
-            font-size: 0.9rem; border-radius: 3px;
+            width: 100%; padding: 12px 14px;
+            background: #1a1a1a; border: 1px solid #2e2e2e;
+            color: var(--text); font-family: 'Inter', sans-serif;
+            font-size: 0.92rem; border-radius: 8px;
             margin-bottom: 8px; -webkit-appearance: none;
-            outline: none;
+            outline: none; transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .det-input:focus { border-color: var(--primary); }
+        .det-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); background: #1f1f1f; }
         .det-select {
-            width: 100%; padding: 11px 32px 11px 12px;
-            background: #000; border: 1px solid #222;
-            color: var(--primary); font-family: 'Fira Code', monospace;
-            font-size: 0.9rem; border-radius: 3px;
+            width: 100%; padding: 12px 36px 12px 14px;
+            background: #1a1a1a; border: 1px solid #2e2e2e;
+            color: var(--text); font-family: 'Inter', sans-serif;
+            font-size: 0.92rem; border-radius: 8px;
             margin-bottom: 8px; -webkit-appearance: none;
             outline: none; cursor: pointer;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23c5a059'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 12px center;
+            background-position: right 14px center;
         }
         .det-btn {
-            width: 100%; padding: 12px;
-            min-height: 46px; font-size: 0.72rem;
-            border-radius: 3px; font-weight: 700;
-            cursor: pointer; font-family: 'Fira Code', monospace;
-            text-transform: uppercase; transition: all 0.2s;
-            -webkit-appearance: none;
+            width: 100%; padding: 13px;
+            min-height: 48px; font-size: 0.8rem;
+            border-radius: 8px; font-weight: 700;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            transition: all 0.2s; -webkit-appearance: none;
         }
         .det-btn-primary {
             background: var(--primary); color: #000;
@@ -396,10 +417,10 @@
 <body>
 
 <div id="login-screen">
-    <h2 style="margin-bottom: 20px;">ACESSO RESTRITO</h2>
-    <input type="password" id="pass-input" placeholder="DIGITE A SENHA" onkeydown="checkEnter(event)">
-    <br>
-    <button onclick="verificarSenha()" style="width: auto; padding: 10px 30px;">ENTRAR</button>
+    <h2>ACESSO RESTRITO</h2>
+    <p>Sistema de gerenciamento de barbearias</p>
+    <input type="password" id="pass-input" placeholder="Digite sua senha" onkeydown="checkEnter(event)">
+    <button onclick="verificarSenha()">Entrar</button>
 </div>
 
 <div class="terminal" id="main-terminal">
@@ -416,27 +437,27 @@
 
     <!-- Seção: Gerar Código -->
     <div id="section-gen">
-        <h2>MASTER_GEN</h2>
-        <div class="status">> INICIALIZANDO PROTOCOLO_KEY...</div>
+        <h2>Gerar Chave</h2>
+        <div class="status">Gere uma chave de ativação para um cliente</div>
         <button onclick="gerarCodigo()">[ GERAR_CHAVE_UNICA ]</button>
         <div id="output-zone" class="output-zone">
             <div id="resultado" class="code-box" onclick="copiarCodigo()"></div>
             <div class="log" id="log-text">
-                > CONEXÃO ESTABELECIDA COM FIREBASE...<br>
-                > STATUS: AGUARDANDO ATIVAÇÃO NO PAINEL CLIENTE...<br>
-                > SEGURANÇA: APENAS CÓDIGOS DESTA SESSÃO SÃO VÁLIDOS.
+                Chave gerada e salva no Firebase.<br>
+                Aguardando ativação no painel do cliente.<br>
+                <span style="color:var(--primary);">Toque na chave acima para copiar.</span>
             </div>
         </div>
     </div>
 
     <!-- Seção: Clientes -->
     <div id="section-cfg" style="display:none;">
-        <h2 style="font-size:1rem; margin-bottom:4px;">CLIENTES_SYS</h2>
-        <div class="status">> GERENCIAR BARBEARIAS CADASTRADAS...</div>
+        <h2 style="font-size:1rem; margin-bottom:4px;">Barbearias</h2>
+        <div class="status">Clique em uma barbearia para ver os detalhes</div>
 
         <!-- Cadastrar novo cliente -->
         <div style="margin-bottom:16px; padding:12px; border:1px solid #1a1a1a; border-radius:4px;">
-            <div class="log" style="margin-top:0; margin-bottom:10px; color:#666;">> NOVO_CLIENTE:</div>
+            <p style="font-size:0.78rem;font-weight:700;color:var(--text2);margin:0 0 12px 0;text-transform:uppercase;letter-spacing:0.5px;">Nova Barbearia</p>
             <input type="text" id="cli-nome" placeholder="NOME DA BARBEARIA"
                 style="width:100%; padding:10px; font-size:0.8rem; margin-bottom:8px; color:var(--primary); text-transform:uppercase;">
             <input type="text" id="cli-dono" placeholder="NOME DO DONO"
@@ -448,25 +469,25 @@
 
         <!-- Links gerados -->
         <div id="links-gerados" style="display:none; margin-bottom:16px; padding:12px; border:1px solid #1a2a1a; border-radius:4px; background:#050f05;">
-            <div class="log" style="margin-top:0; margin-bottom:10px; color:#4a7a4a;">> LINKS_GERADOS ✓</div>
+            <p style="font-size:0.78rem;font-weight:700;color:#22c55e;margin:0 0 14px 0;">✓ Links gerados com sucesso</p>
             <div style="margin-bottom:8px;">
-                <div class="log" style="margin-top:0; margin-bottom:4px; color:#555;">> AGENDAMENTO (cliente):</div>
+                <p style="font-size:0.72rem;font-weight:600;color:var(--text2);margin:0 0 6px 0;">Link de Agendamento (cliente):</p>
                 <div id="link-index" class="code-box" onclick="copiarLink('link-index')" style="font-size:0.65rem; word-break:break-all; padding:12px;"></div>
             </div>
             <div style="margin-top:16px;">
-                <div class="log" style="margin-top:0; margin-bottom:4px; color:#555;">> PAINEL ADMIN (barbearia):</div>
+                <p style="font-size:0.72rem;font-weight:600;color:var(--text2);margin:0 0 6px 0;">Painel Administrativo (barbearia):</p>
                 <div id="link-admin" class="code-box" onclick="copiarLink('link-admin')" style="font-size:0.65rem; word-break:break-all; padding:12px;"></div>
             </div>
-            <div class="log" style="margin-top:16px; color:#2a5a2a; line-height:1.6;">
-                > ID: <span id="link-id" style="color:var(--primary)"></span><br>
-                > STATUS: ATIVO ✓<br>
-                > CLIQUE NOS LINKS PARA COPIAR
+            <div style="margin-top:14px;padding:10px 12px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.15);border-radius:8px;font-size:0.72rem;color:var(--text2);line-height:1.8;">
+                ID: <span id="link-id" style="color:var(--primary);font-weight:700;"></span><br>
+                Status: <span style="color:#22c55e;font-weight:700;">Ativo ✓</span><br>
+                <span style="color:var(--text3);">Toque nos links para copiar</span>
             </div>
         </div>
 
         <!-- Lista de clientes -->
         <div>
-            <div class="log" style="margin-top:0; margin-bottom:8px; color:#555;">> CLIENTES_CADASTRADOS:</div>
+            <p style="font-size:0.78rem;font-weight:700;color:var(--text2);margin:0 0 10px 0;text-transform:uppercase;letter-spacing:0.5px;">Barbearias Cadastradas</p>
             <div id="lista-clientes" style="max-height:300px; overflow-y:auto;">
                 <div style="color:#333; font-size:0.65rem;">carregando...</div>
             </div>
@@ -474,14 +495,14 @@
 
         <!-- CONFIG PIX -->
         <div style="margin-top:20px; padding-top:16px; border-top:1px solid #1a1a1a;">
-            <div class="log" style="margin-top:0; margin-bottom:8px; color:#555;">> CHAVE_PIX_GLOBAL:</div>
+            <p style="font-size:0.78rem;font-weight:700;color:var(--text2);margin:0 0 10px 0;text-transform:uppercase;letter-spacing:0.5px;">Chave PIX Global</p>
             <div id="pix-atual" style="padding:10px; background:#000; border:1px solid #222; color:var(--primary); font-size:0.8rem; word-break:break-all; min-height:36px; margin-bottom:8px;">
                 <span style="color:#333;">carregando...</span>
             </div>
             <input type="text" id="pix-input" placeholder="email, telefone ou CPF..."
                 style="width:100%; padding:10px; font-size:0.8rem; margin-bottom:8px; color:var(--primary);">
             <button onclick="salvarPix()" style="padding:10px; font-size:0.75rem;">[ SALVAR_CHAVE_PIX ]</button>
-            <div id="pix-feedback" style="display:none; margin-top:10px;" class="log">> STATUS: CHAVE_PIX ATUALIZADA. ✓</div>
+            <div id="pix-feedback" style="display:none; margin-top:10px; padding:10px 12px; background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.2); border-radius:8px; font-size:0.75rem; font-weight:600; color:#22c55e;">✓ Chave PIX atualizada com sucesso!</div>
         </div>
     </div>
 </div>
@@ -602,7 +623,7 @@
         <h3 id="modal-titulo">> GERAR_TOKEN_MENSAL</h3>
         <div id="modal-cliente-info" style="font-size:0.65rem; color:#666; margin-bottom:4px;"></div>
 
-        <label>> PLANO</label>
+        <label>Plano</label>
         <select id="modal-plano" onchange="toggleCustomDias()">
             <option value="30">30 dias — Mensal</option>
             <option value="90">90 dias — Trimestral</option>
@@ -611,11 +632,11 @@
         </select>
 
         <div id="modal-custom-wrap" style="display:none;">
-            <label>> DIAS PERSONALIZADOS</label>
+            <label>Dias personalizados</label>
             <input type="number" id="modal-dias-custom" placeholder="Ex: 60" min="1" max="3650">
         </div>
 
-        <label>> TOKEN ATUAL (deixe em branco para gerar novo)</label>
+        <label>Token atual (deixe vazio para gerar automaticamente)</label>
         <input type="text" id="modal-token-input" placeholder="XXXX-XXXX-XXXX-XXXX (opcional)"
             oninput="this.value=this.value.toUpperCase()" style="letter-spacing:2px;">
 

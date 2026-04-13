@@ -22,11 +22,12 @@
             color: var(--text); 
             font-family: 'Fira Code', monospace; 
             display: flex; 
-            align-items: center; 
+            align-items: flex-start; 
             justify-content: center; 
-            height: 100vh; 
+            min-height: 100vh; 
             margin: 0;
-            overflow: hidden;
+            padding: 20px 0;
+            overflow-y: auto;
         }
 
         /* Efeito de scanline */
@@ -42,17 +43,37 @@
 
         .terminal { 
             background: var(--terminal-bg); 
-            padding: 40px; 
+            padding: 30px; 
             border-radius: 4px; 
             border: 1px solid var(--border); 
             text-align: left; 
-            width: 90%;
-            max-width: 450px; 
+            width: 95%;
+            max-width: 560px; 
             position: relative;
             box-shadow: 0 0 20px rgba(0,0,0,1);
             z-index: 20;
-            display: none; /* Inicia oculto */
+            display: none;
         }
+        .modal-token {
+            display:none; position:fixed; inset:0; background:rgba(0,0,0,.85);
+            z-index:999; align-items:center; justify-content:center; padding:20px;
+        }
+        .modal-token.open { display:flex; }
+        .modal-box {
+            background:#0a0a0a; border:1px solid var(--primary); border-radius:6px;
+            padding:28px; width:100%; max-width:420px;
+        }
+        .modal-box h3 { color:var(--primary); font-size:0.85rem; margin:0 0 16px 0; letter-spacing:2px; }
+        .modal-box label { display:block; font-size:0.6rem; color:#555; margin-bottom:5px; margin-top:12px; }
+        .modal-box input, .modal-box select {
+            width:100%; padding:10px; background:#000; border:1px solid #333;
+            color:var(--primary); font-family:'Fira Code',monospace; font-size:0.8rem;
+        }
+        .modal-box select option { background:#0a0a0a; }
+        .modal-footer { display:flex; gap:8px; margin-top:20px; }
+        .modal-footer button { flex:1; padding:10px; font-size:0.7rem; }
+        .btn-cancel-modal { border-color:#333 !important; color:#555 !important; }
+        .btn-cancel-modal:hover { background:#1a1a1a !important; color:#999 !important; box-shadow:none !important; }
 
         /* Container de Login */
         #login-screen {
@@ -241,6 +262,42 @@
     </div>
 </div>
 
+<!-- MODAL: GERAR/RENOVAR TOKEN -->
+<div class="modal-token" id="modal-token">
+    <div class="modal-box">
+        <h3 id="modal-titulo">> GERAR_TOKEN_MENSAL</h3>
+        <div id="modal-cliente-info" style="font-size:0.65rem; color:#666; margin-bottom:4px;"></div>
+
+        <label>> PLANO</label>
+        <select id="modal-plano" onchange="toggleCustomDias()">
+            <option value="30">30 dias — Mensal</option>
+            <option value="90">90 dias — Trimestral</option>
+            <option value="365">365 dias — Anual</option>
+            <option value="custom">Personalizado</option>
+        </select>
+
+        <div id="modal-custom-wrap" style="display:none;">
+            <label>> DIAS PERSONALIZADOS</label>
+            <input type="number" id="modal-dias-custom" placeholder="Ex: 60" min="1" max="3650">
+        </div>
+
+        <label>> TOKEN ATUAL (deixe em branco para gerar novo)</label>
+        <input type="text" id="modal-token-input" placeholder="XXXX-XXXX-XXXX-XXXX (opcional)"
+            oninput="this.value=this.value.toUpperCase()" style="letter-spacing:2px;">
+
+        <div id="modal-token-gerado" style="display:none; margin-top:16px; padding:14px; background:#000; border:1px solid #1a3a1a; border-radius:4px;">
+            <div style="font-size:0.55rem; color:#2a6a2a; margin-bottom:6px;">> TOKEN_GERADO ✓ — CLIQUE PARA COPIAR</div>
+            <div id="modal-token-valor" onclick="copiarTokenModal()" style="color:var(--primary); font-size:0.9rem; font-weight:700; letter-spacing:3px; text-align:center; cursor:pointer; padding:8px;"></div>
+            <div id="modal-expira-info" style="font-size:0.55rem; color:#444; margin-top:6px; text-align:center;"></div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-cancel-modal" onclick="fecharModalToken()">[ CANCELAR ]</button>
+            <button onclick="confirmarToken()">[ CONFIRMAR ]</button>
+        </div>
+    </div>
+</div>
+
 <script>
     // --- Lógica de Acesso ---
     function verificarSenha() {
@@ -379,20 +436,48 @@
                 container.innerHTML = '<div style="color:#333;font-size:0.65rem;">Nenhum cliente cadastrado.</div>';
                 return;
             }
+            const agora = Date.now();
             container.innerHTML = snap.docs.map(d => {
                 const c = d.data();
                 const statusColor = c.ativo ? '#2a7a2a' : '#7a2a2a';
-                const statusTxt = c.ativo ? 'ATIVO' : 'INATIVO';
-                return `<div style="border:1px solid #1a1a1a; border-radius:4px; padding:10px; margin-bottom:8px; background:#000;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                        <span style="color:var(--primary); font-size:0.75rem; font-weight:700;">${c.nome || '—'}</span>
-                        <span style="color:${statusColor}; font-size:0.6rem; border:1px solid ${statusColor}; padding:2px 6px; border-radius:3px;">${statusTxt}</span>
+                const statusTxt   = c.ativo ? 'ATIVO' : 'INATIVO';
+
+                // Status do token
+                let tokenBadge = '', tokenInfo = '', tokenBtnLabel = '🔑 GERAR TOKEN';
+                if (c.token) {
+                    const exp = c.tokenExpira || 0;
+                    const diasRestantes = Math.ceil((exp - agora) / 86400000);
+                    if (exp < agora) {
+                        tokenBadge = `<span style="color:#ff4444;font-size:0.55rem;border:1px solid #ff4444;padding:1px 5px;border-radius:3px;">TOKEN EXPIRADO</span>`;
+                        tokenInfo  = `<div style="color:#5a2a2a;font-size:0.55rem;margin-top:3px;">Expirou em ${new Date(exp).toLocaleDateString('pt-BR')}</div>`;
+                        tokenBtnLabel = '🔄 RENOVAR TOKEN';
+                    } else if (diasRestantes <= 7) {
+                        tokenBadge = `<span style="color:#f59e0b;font-size:0.55rem;border:1px solid #f59e0b;padding:1px 5px;border-radius:3px;">VENCE EM ${diasRestantes}d</span>`;
+                        tokenInfo  = `<div style="color:#554a00;font-size:0.55rem;margin-top:3px;cursor:pointer;" onclick="copiarTexto('${c.token}')">Token: ${c.token} 📋</div>`;
+                        tokenBtnLabel = '🔄 RENOVAR TOKEN';
+                    } else {
+                        tokenBadge = `<span style="color:#22c55e;font-size:0.55rem;border:1px solid #22c55e;padding:1px 5px;border-radius:3px;">✓ ATIVO — ${diasRestantes}d</span>`;
+                        tokenInfo  = `<div style="color:#1a4a2a;font-size:0.55rem;margin-top:3px;cursor:pointer;" onclick="copiarTexto('${c.token}')">Token: ${c.token} 📋 | Expira: ${new Date(c.tokenExpira||0).toLocaleDateString('pt-BR')}</div>`;
+                        tokenBtnLabel = '🔄 RENOVAR TOKEN';
+                    }
+                } else {
+                    tokenBadge = `<span style="color:#444;font-size:0.55rem;border:1px solid #333;padding:1px 5px;border-radius:3px;">SEM TOKEN</span>`;
+                }
+
+                return `<div style="border:1px solid #1a1a1a;border-radius:4px;padding:10px;margin-bottom:8px;background:#000;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                        <span style="color:var(--primary);font-size:0.75rem;font-weight:700;">${c.nome||'—'}</span>
+                        <span style="color:${statusColor};font-size:0.6rem;border:1px solid ${statusColor};padding:2px 6px;border-radius:3px;">${statusTxt}</span>
                     </div>
-                    <div style="color:#555; font-size:0.6rem; margin-bottom:4px;">Dono: ${c.dono || '—'} ${c.whatsapp ? '| WhatsApp: ' + c.whatsapp : ''}</div>
-                    <div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
-                        <button onclick="copiarTexto('${c.linkIndex}')" style="padding:5px 8px; font-size:0.6rem; flex:1;">📋 LINK CLIENTE</button>
-                        <button onclick="copiarTexto('${c.linkAdmin}')" style="padding:5px 8px; font-size:0.6rem; flex:1;">📋 LINK ADMIN</button>
-                        <button onclick="toggleCliente('${d.id}', ${!c.ativo})" style="padding:5px 8px; font-size:0.6rem; flex:1; border-color:${c.ativo ? '#7a2a2a' : '#2a7a2a'}; color:${c.ativo ? '#ff6666' : '#66ff88'};">${c.ativo ? '🔒 BLOQUEAR' : '✅ ATIVAR'}</button>
+                    <div style="color:#444;font-size:0.6rem;margin-bottom:5px;">${c.dono||''} ${c.whatsapp ? '· '+c.whatsapp : ''}</div>
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px;flex-wrap:wrap;">
+                        ${tokenBadge}${tokenInfo}
+                    </div>
+                    <div style="display:flex;gap:5px;flex-wrap:wrap;">
+                        <button onclick="abrirModalToken('${d.id}')" style="padding:6px 8px;font-size:0.6rem;flex:2;border-color:#2a5a2a;color:#66cc88;">${tokenBtnLabel}</button>
+                        <button onclick="copiarTexto('${c.linkIndex||''}')" style="padding:6px 8px;font-size:0.6rem;flex:1;">📱</button>
+                        <button onclick="copiarTexto('${c.linkAdmin||''}')" style="padding:6px 8px;font-size:0.6rem;flex:1;">⚙️</button>
+                        <button onclick="toggleCliente('${d.id}',${!c.ativo})" style="padding:6px 8px;font-size:0.6rem;flex:1;border-color:${c.ativo?'#7a2a2a':'#2a7a2a'};color:${c.ativo?'#ff6666':'#66ff88'};">${c.ativo?'🔒':'✅'}</button>
                     </div>
                 </div>`;
             }).join('');
@@ -409,10 +494,79 @@
     }
 
     function copiarTexto(txt) {
+        if (!txt) { alert('Link não disponível.'); return; }
         navigator.clipboard.writeText(txt).then(() => alert('COPIADO!\n' + txt));
     }
 
-    // ===== CHAVE PIX =====
+    // ===== MODAL TOKEN =====
+    let _tokenClienteId = null;
+
+    async function abrirModalToken(id) {
+        _tokenClienteId = id;
+        const snap = await db.collection('clientes').doc(id).get();
+        const c = snap.data();
+
+        document.getElementById('modal-titulo').textContent =
+            c.token ? '> RENOVAR_TOKEN: ' + (c.nome||id) : '> GERAR_TOKEN: ' + (c.nome||id);
+        document.getElementById('modal-cliente-info').textContent =
+            'Dono: ' + (c.dono||'—') + (c.whatsapp ? ' · '+c.whatsapp : '');
+        document.getElementById('modal-plano').value = '30';
+        document.getElementById('modal-token-input').value = c.token || '';
+        document.getElementById('modal-token-gerado').style.display = 'none';
+        document.getElementById('modal-custom-wrap').style.display = 'none';
+        document.getElementById('modal-token').classList.add('open');
+    }
+
+    function fecharModalToken() {
+        document.getElementById('modal-token').classList.remove('open');
+        _tokenClienteId = null;
+        loadClientes();
+    }
+
+    function toggleCustomDias() {
+        const plano = document.getElementById('modal-plano').value;
+        document.getElementById('modal-custom-wrap').style.display = plano === 'custom' ? 'block' : 'none';
+    }
+
+    function gerarTokenAleatorio() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        const part = () => Array.from({length:4}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+        return `${part()}-${part()}-${part()}-${part()}`;
+    }
+
+    async function confirmarToken() {
+        if (!_tokenClienteId) return;
+        const plano = document.getElementById('modal-plano').value;
+        let dias = parseInt(plano);
+        if (plano === 'custom') {
+            dias = parseInt(document.getElementById('modal-dias-custom').value);
+            if (!dias || dias < 1) { alert('ERRO: Informe os dias!'); return; }
+        }
+        const tokenManual = document.getElementById('modal-token-input').value.trim().toUpperCase();
+        const token = tokenManual || gerarTokenAleatorio();
+        const expira = Date.now() + dias * 86400000;
+        try {
+            await db.collection('clientes').doc(_tokenClienteId).update({
+                token, tokenExpira: expira, tokenDias: dias, tokenAtualizadoEm: new Date()
+            });
+            document.getElementById('modal-token-valor').textContent = token;
+            document.getElementById('modal-expira-info').textContent =
+                `> Válido por ${dias} dias · Expira em ${new Date(expira).toLocaleDateString('pt-BR')}`;
+            document.getElementById('modal-token-gerado').style.display = 'block';
+            navigator.clipboard.writeText(token).catch(()=>{});
+        } catch(e) { alert('ERRO: ' + e.message); }
+    }
+
+    function copiarTokenModal() {
+        const t = document.getElementById('modal-token-valor').textContent;
+        navigator.clipboard.writeText(t).then(() => {
+            const el = document.getElementById('modal-token-valor');
+            el.style.color = '#00ff88';
+            setTimeout(() => el.style.color = 'var(--primary)', 800);
+        });
+    }
+
+        // ===== CHAVE PIX =====
     async function loadPix() {
         const el = document.getElementById('pix-atual');
         try {

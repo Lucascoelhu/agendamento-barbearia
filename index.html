@@ -779,9 +779,9 @@
         
                 btn.textContent = "PROCESSANDO...";
         
-                // Se passou na verificação, prossegue com o agendamento
+                // Se passou na verificação, salva diretamente no Firestore
                 for (const ag of carrinho) {
-                    const payload = {
+                    await db.collection("agenda").add({
                         cliente: nomeInput,
                         whatsapp: zapInput,
                         barbeiroId: ag.barbeiroId,
@@ -789,35 +789,30 @@
                         data: ag.data,
                         hora: ag.hora,
                         servico: ag.servico,
-                        duracao: ag.duracao
-                    };
-        
-                    const response = await fetch('/api/agendar', {
-                        method: 'POST',
-                        headers: { 
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify(payload)
+                        duracao: ag.duracao,
+                        concluido: false,
+                        criadoEm: new Date()
                     });
-        
-                    const contentType = response.headers.get("content-type");
-                    let result;
-                    
-                    if (contentType && contentType.includes("application/json")) {
-                        result = await response.json();
-                    } else {
-                        const text = await response.text();
-                        throw new Error(`Erro ${response.status}: ${text.substring(0, 200)}`);
-                    }
-        
-                    if (!response.ok) {
-                        // Se o backend detectou conflito
-                        if (response.status === 409) {
-                            throw new Error("Este horário acabou de ser reservado por outro cliente. Por favor, escolha outro.");
+
+                    // Notificação Telegram (se configurado)
+                    try {
+                        const botDoc = await db.collection("configuracao").doc("bot").get();
+                        if (botDoc.exists && botDoc.data().token && botDoc.data().chatId) {
+                            const { token, chatId } = botDoc.data();
+                            const msg = `🆕 *Novo Agendamento*
+👤 ${nomeInput}
+📱 ${zapInput}
+✂️ ${ag.servico}
+💈 ${ag.barbeiroNome}
+📅 ${ag.data.split("-").reverse().join("/")}
+⏰ ${ag.hora}`;
+                            fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ chat_id: chatId, text: msg, parse_mode: "Markdown" })
+                            }).catch(() => {});
                         }
-                        throw new Error(result.erro || result.error || `Erro HTTP ${response.status}`);
-                    }
+                    } catch(e) {}
                 }
         
                 carrinho = [];

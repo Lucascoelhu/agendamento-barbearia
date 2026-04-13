@@ -771,7 +771,7 @@ async function limparAgendamentosConcluidos() {
             .where("data", "<=", hojeISO)
             .get();
         
-        const batch = db.batch();
+        const batch = _db.batch();
         let houveAlteracao = false;
 
         snap.forEach((doc) => {
@@ -917,7 +917,7 @@ async function limparAgendamentosAntigos() {
             return;
         }
 
-        const batch = db.batch();
+        const batch = _db.batch();
         let contador = 0;
 
         snap.forEach((doc) => {
@@ -976,7 +976,7 @@ function agendarProximaLimpeza() {
             if(dataEsp < hj) return alert("Você não pode bloquear uma data que já passou!");
         }
         
-        const batch = db.batch(); // Inicia gravação em lote
+        const batch = _db.batch(); // Inicia gravação em lote
         
         horas.forEach(h => {
             const ref = db.collection("bloqueios").doc();
@@ -1222,7 +1222,7 @@ async function excluirBloqueioDireto(id) {
         
         if(!confirm(`Deseja remover todos os ${ids.length} horários bloqueados deste dia?`)) return;
         
-        const batch = db.batch();
+        const batch = _db.batch();
         
         ids.forEach(id => {
             const ref = db.collection("bloqueios").doc(id);
@@ -1471,7 +1471,8 @@ async function excluirBloqueioDireto(id) {
     if (!cod) return alert("Digite um código.");
     
     try {
-        const docRef = db.collection("codigos_ativacao").doc(cod);
+        // codigos_ativacao é coleção GLOBAL — usa _db direto
+        const docRef = _db.collection("codigos_ativacao").doc(cod);
         const docSnap = await docRef.get();
         
         if (docSnap.exists) {
@@ -2000,6 +2001,8 @@ function marcarTodos(status) {
         else c.classList.remove('active');
     });
 }
+
+
 </script>
 </body>
 </html>

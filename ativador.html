@@ -8,6 +8,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <style>
+        *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         :root {
             --primary: #c5a059;
             --primary-glow: rgba(197, 160, 89, 0.4);
@@ -17,6 +19,8 @@
             --text: #e0e0e0;
         }
 
+        html { height: 100%; }
+
         body { 
             background: var(--bg); 
             color: var(--text); 
@@ -24,148 +28,241 @@
             display: flex; 
             align-items: flex-start; 
             justify-content: center; 
-            min-height: 100vh; 
+            min-height: 100%;
             margin: 0;
-            padding: 20px 0;
+            padding: 16px 12px 40px;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
-        /* Efeito de scanline */
-        body::before {
-            content: " ";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 4px, 3px 100%;
-            pointer-events: none;
-            z-index: 10;
+        /* Scanline — desativado no mobile pra não pesar */
+        @media (min-width: 600px) {
+            body::before {
+                content: " ";
+                position: fixed;
+                inset: 0;
+                background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,.2) 50%),
+                            linear-gradient(90deg, rgba(255,0,0,.04), rgba(0,255,0,.01), rgba(0,0,255,.04));
+                background-size: 100% 4px, 3px 100%;
+                pointer-events: none;
+                z-index: 10;
+            }
         }
 
+        /* ── LOGIN SCREEN ── */
+        #login-screen {
+            z-index: 30;
+            text-align: center;
+            width: 100%;
+            max-width: 360px;
+            padding: 20px;
+        }
+        #login-screen h2 { font-size: 1.2rem; margin-bottom: 24px; }
+        #login-screen input {
+            width: 100%;
+            font-size: 1rem;
+            padding: 14px;
+            margin-bottom: 14px;
+            border-radius: 4px;
+        }
+        #login-screen button {
+            width: auto;
+            padding: 13px 32px;
+            font-size: 0.85rem;
+            min-height: 48px;
+            border-radius: 4px;
+        }
+
+        /* ── TERMINAL ── */
         .terminal { 
             background: var(--terminal-bg); 
-            padding: 30px; 
-            border-radius: 4px; 
+            padding: 20px 16px;
+            border-radius: 6px; 
             border: 1px solid var(--border); 
-            text-align: left; 
-            width: 95%;
+            width: 100%;
             max-width: 560px; 
             position: relative;
             box-shadow: 0 0 20px rgba(0,0,0,1);
             z-index: 20;
             display: none;
         }
-        .modal-token {
-            display:none; position:fixed; inset:0; background:rgba(0,0,0,.85);
-            z-index:999; align-items:center; justify-content:center; padding:20px;
-        }
-        .modal-token.open { display:flex; }
-        .modal-box {
-            background:#0a0a0a; border:1px solid var(--primary); border-radius:6px;
-            padding:28px; width:100%; max-width:420px;
-        }
-        .modal-box h3 { color:var(--primary); font-size:0.85rem; margin:0 0 16px 0; letter-spacing:2px; }
-        .modal-box label { display:block; font-size:0.6rem; color:#555; margin-bottom:5px; margin-top:12px; }
-        .modal-box input, .modal-box select {
-            width:100%; padding:10px; background:#000; border:1px solid #333;
-            color:var(--primary); font-family:'Fira Code',monospace; font-size:0.8rem;
-        }
-        .modal-box select option { background:#0a0a0a; }
-        .modal-footer { display:flex; gap:8px; margin-top:20px; }
-        .modal-footer button { flex:1; padding:10px; font-size:0.7rem; }
-        .btn-cancel-modal { border-color:#333 !important; color:#555 !important; }
-        .btn-cancel-modal:hover { background:#1a1a1a !important; color:#999 !important; box-shadow:none !important; }
-
-        /* Container de Login */
-        #login-screen {
-            z-index: 30;
-            text-align: center;
-        }
-
-        input {
-            background: #000;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            padding: 10px;
-            font-family: 'Fira Code', monospace;
-            outline: none;
-            text-align: center;
-            margin-bottom: 15px;
-        }
 
         .terminal-header {
             color: var(--primary);
-            font-size: 0.7rem;
-            margin-bottom: 20px;
+            font-size: 0.65rem;
+            margin-bottom: 16px;
             border-bottom: 1px solid var(--border);
             padding-bottom: 10px;
             display: flex;
             justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 4px;
         }
 
         h2 { 
             font-family: 'Cinzel', serif; 
             color: var(--primary); 
-            margin: 0 0 5px 0;
-            letter-spacing: 4px;
+            margin: 0 0 4px 0;
+            font-size: 1.1rem;
+            letter-spacing: 3px;
             text-shadow: 0 0 10px var(--primary-glow);
         }
 
-        .status { font-size: 0.6rem; color: #444; margin-bottom: 30px; }
+        .status { font-size: 0.6rem; color: #444; margin-bottom: 20px; }
 
+        /* ── INPUTS GLOBAIS ── */
+        input {
+            background: #000;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem; /* evita zoom no iOS */
+            outline: none;
+            text-align: center;
+            margin-bottom: 10px;
+            border-radius: 3px;
+            -webkit-appearance: none;
+            width: 100%;
+        }
+        input::placeholder { color: #333; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 8px var(--primary-glow); }
+
+        /* ── BOTÕES ── */
         button { 
             background: transparent; 
             border: 1px solid var(--primary); 
-            padding: 15px; 
+            padding: 13px 10px;
+            min-height: 46px; /* área de toque mínima */
             width: 100%; 
             color: var(--primary);
             font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
             font-weight: 700; 
             cursor: pointer; 
-            transition: all 0.3s;
+            transition: all 0.2s;
             text-transform: uppercase;
+            border-radius: 3px;
+            -webkit-appearance: none;
         }
-
-        button:hover {
+        button:active {
             background: var(--primary);
             color: #000;
-            box-shadow: 0 0 15px var(--primary-glow);
+            transform: scale(0.97);
+        }
+        @media (hover: hover) {
+            button:hover {
+                background: var(--primary);
+                color: #000;
+                box-shadow: 0 0 15px var(--primary-glow);
+            }
         }
 
-        .output-zone {
-            margin-top: 30px;
-            display: none;
-        }
+        /* ── TABS ── */
+        .tabs-wrap { display: flex; gap: 8px; margin-bottom: 20px; }
+        .tabs-wrap button { padding: 11px 8px; font-size: 0.7rem; }
 
+        /* ── CODE BOX ── */
         .code-box { 
-            padding: 20px; 
+            padding: 16px 12px 28px;
             background: #000; 
             color: var(--primary); 
             border: 1px solid var(--primary-glow); 
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             text-align: center;
             cursor: pointer;
             position: relative;
             transition: 0.2s;
+            border-radius: 3px;
+            word-break: break-all;
         }
-
-        .code-box:active { transform: scale(0.95); }
-
+        .code-box:active { transform: scale(0.97); }
         .code-box::after {
-            content: "[ CLIQUE NO CÓDIGO PARA COPIAR ]";
+            content: "[ toque para copiar ]";
             position: absolute;
-            bottom: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 8px;
-            color: #444;
-            white-space: nowrap;
+            bottom: 8px;
+            left: 0; right: 0;
+            font-size: 0.55rem;
+            color: #333;
+            text-align: center;
         }
+
+        .output-zone { margin-top: 24px; display: none; }
 
         .log {
             font-size: 0.6rem;
             color: #333;
-            margin-top: 35px;
-            line-height: 1.4;
+            margin-top: 24px;
+            line-height: 1.6;
+        }
+
+        /* ── LISTA CLIENTES ── */
+        #lista-clientes { max-height: 60vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+        /* ── MODAL TOKEN ── */
+        .modal-token {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.9);
+            z-index: 999;
+            align-items: flex-end; /* sobe do fundo no mobile */
+            justify-content: center;
+            padding: 0;
+        }
+        .modal-token.open { display: flex; }
+        .modal-box {
+            background: #0a0a0a;
+            border: 1px solid var(--primary);
+            border-radius: 12px 12px 0 0; /* sheet estilo mobile */
+            padding: 24px 20px 36px;
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        /* No desktop, centraliza */
+        @media (min-width: 600px) {
+            .modal-token { align-items: center; padding: 20px; }
+            .modal-box { border-radius: 8px; }
+        }
+        .modal-box h3 {
+            color: var(--primary); font-size: 0.8rem;
+            margin: 0 0 4px 0; letter-spacing: 2px;
+        }
+        .modal-box label {
+            display: block; font-size: 0.6rem; color: #555;
+            margin-bottom: 5px; margin-top: 14px;
+        }
+        .modal-box input, .modal-box select {
+            width: 100%; padding: 13px 12px;
+            background: #000; border: 1px solid #333;
+            color: var(--primary);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem; /* evita zoom iOS */
+            border-radius: 3px;
+            -webkit-appearance: none;
+        }
+        .modal-box select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23c5a059'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+            cursor: pointer;
+        }
+        .modal-box select option { background: #0a0a0a; }
+        .modal-footer { display: flex; gap: 8px; margin-top: 20px; }
+        .modal-footer button { flex: 1; padding: 14px 8px; font-size: 0.7rem; min-height: 50px; }
+        .btn-cancel-modal { border-color: #333 !important; color: #555 !important; }
+        .btn-cancel-modal:active { background: #111 !important; color: #888 !important; box-shadow: none !important; }
+
+        /* ── CAMPOS DA SEÇÃO CLIENTES ── */
+        #section-cfg input {
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        #section-cfg button {
+            font-size: 0.72rem;
         }
     </style>
 </head>
@@ -185,9 +282,9 @@
     </div>
 
     <!-- Tab buttons -->
-    <div style="display:flex; gap:8px; margin-bottom:20px;">
-        <button id="btn-tab-gen" onclick="switchTab('gen')" style="flex:1; padding:8px; font-size:0.65rem; background: var(--primary); color:#000; border-color: var(--primary);">[ GERAR_CHAVE ]</button>
-        <button id="btn-tab-cfg" onclick="switchTab('cfg')" style="flex:1; padding:8px; font-size:0.65rem; background: transparent; color: var(--primary);">[ CLIENTES ]</button>
+    <div class="tabs-wrap">
+        <button id="btn-tab-gen" onclick="switchTab('gen')" style="flex:1; background: var(--primary); color:#000; border-color: var(--primary);">[ GERAR_CHAVE ]</button>
+        <button id="btn-tab-cfg" onclick="switchTab('cfg')" style="flex:1;">[ CLIENTES ]</button>
     </div>
 
     <!-- Seção: Gerar Código -->

@@ -633,40 +633,308 @@
 </div>
 
 <script>
-(function() {
-    function init() {
+    const SENHA = 'coelhus';
+    const firebaseConfig = {
+        apiKey: "AIzaSyCpgSr9MCmJvylVZgS0Acj0_u8UT8tkl-o",
+        authDomain: "projeto-agend-barber.firebaseapp.com",
+        projectId: "projeto-agend-barber",
+        storageBucket: "projeto-agend-barber.firebasestorage.app",
+        messagingSenderId: "368845787419",
+        appId: "1:368845787419:web:cc902e9081e3a35cac2ae1"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-        // Expor funções globalmente
-        window.verificarSenha = verificarSenha;
-        window.checkEnter = checkEnter;
-        window.switchTab = switchTab;
-        window.gerarCodigo = gerarCodigo;
-        window.copiarCodigo = copiarCodigo;
-        window.cadastrarCliente = cadastrarCliente;
-        window.copiarLink = copiarLink;
-        window.toggleCustomDias = toggleCustomDias;
-        window.confirmarToken = confirmarToken;
-        window.copiarTokenModal = copiarTokenModal;
-        window.fecharModalToken = fecharModalToken;
-        window.abrirDetalhes = abrirDetalhes;
-        window.fecharDetalhes = fecharDetalhes;
-        window.copiarDet = copiarDet;
-        window.copiarDetTxt = copiarDetTxt;
-        window.detToggleCustom = detToggleCustom;
-        window.detConfirmarToken = detConfirmarToken;
-        window.detSalvarPix = detSalvarPix;
-        window.detSalvarDados = detSalvarDados;
-        window.detToggleAtivo = detToggleAtivo;
-        window.detExcluir = detExcluir;
-        window.salvarPix = salvarPix;
-        window.copiarTexto = copiarTexto;
+    const SITE_BASE = window.location.origin + window.location.pathname.replace('ativador.html','');
+
+    // ── LOGIN ──
+    function verificarSenha() {
+        const s = document.getElementById('pass-input').value;
+        if (s === SENHA) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-terminal').style.display = 'block';
+        } else {
+            alert('SENHA INCORRETA. ACESSO NEGADO.');
+            document.getElementById('pass-input').value = '';
+        }
     }
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
+    function checkEnter(e) { if (e.key === 'Enter') verificarSenha(); }
+
+    // ── ABAS ──
+    function switchTab(tab) {
+        const isGen = tab === 'gen';
+        document.getElementById('section-gen').style.display = isGen ? 'block' : 'none';
+        document.getElementById('section-cfg').style.display = isGen ? 'none' : 'block';
+        document.getElementById('tab-indicator').textContent = isGen ? '// GEN_MODE' : '// CLI_MODE';
+        document.getElementById('btn-tab-gen').style.background = isGen ? 'var(--primary)' : 'transparent';
+        document.getElementById('btn-tab-gen').style.color = isGen ? '#000' : 'var(--primary)';
+        document.getElementById('btn-tab-cfg').style.background = isGen ? 'transparent' : 'var(--primary)';
+        document.getElementById('btn-tab-cfg').style.color = isGen ? 'var(--primary)' : '#000';
+        if (!isGen) { loadClientes(); loadPix(); }
     }
-})();
+
+    // ── GERAR CHAVE ATIVAÇÃO ──
+    async function gerarCodigo() {
+        const p1 = Math.random().toString(36).substring(2,6).toUpperCase();
+        const p2 = Math.random().toString(36).substring(2,6).toUpperCase();
+        const cod = `EL-NGR-${p1}-${p2}`;
+        try {
+            await db.collection('codigos_ativacao').doc(cod).set({ usado:false, dataCriacao:new Date(), dias:30 });
+            document.getElementById('output-zone').style.display = 'block';
+            document.getElementById('resultado').innerText = cod;
+        } catch(e) { alert('ERRO: ' + e.message); }
+    }
+    function copiarCodigo() {
+        const t = document.getElementById('resultado').innerText;
+        if (!t) return;
+        navigator.clipboard.writeText(t).then(() => {
+            const el = document.getElementById('resultado');
+            el.style.color = '#00ff88'; el.style.borderColor = '#00ff88';
+            setTimeout(() => { el.style.color=''; el.style.borderColor='var(--primary-glow)'; alert('CHAVE COPIADA!'); }, 300);
+        });
+    }
+
+    // ── CADASTRAR CLIENTE ──
+    async function cadastrarCliente() {
+        const nome  = document.getElementById('cli-nome').value.trim().toUpperCase();
+        const dono  = document.getElementById('cli-dono').value.trim();
+        const whats = document.getElementById('cli-whats').value.trim();
+        if (!nome || !dono) { alert('ERRO: Preencha nome e dono!'); return; }
+        const id = 'barber_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2,6);
+        const linkIndex = SITE_BASE + 'index.html?id=' + id;
+        const linkAdmin = SITE_BASE + 'admin.html?id=' + id;
+        try {
+            await db.collection('clientes').doc(id).set({ nome, dono, whatsapp:whats, ativo:true, linkIndex, linkAdmin, criado:new Date() });
+            document.getElementById('link-index').textContent = linkIndex;
+            document.getElementById('link-admin').textContent = linkAdmin;
+            document.getElementById('link-id').textContent = id;
+            document.getElementById('links-gerados').style.display = 'block';
+            document.getElementById('cli-nome').value = '';
+            document.getElementById('cli-dono').value = '';
+            document.getElementById('cli-whats').value = '';
+            loadClientes();
+        } catch(e) { alert('ERRO: ' + e.message); }
+    }
+    function copiarLink(elId) {
+        const t = document.getElementById(elId).textContent;
+        navigator.clipboard.writeText(t).then(() => {
+            const el = document.getElementById(elId);
+            el.style.color = '#00ff88'; setTimeout(() => el.style.color='', 800);
+        });
+    }
+
+    // ── LISTAR CLIENTES ──
+    async function loadClientes() {
+        const container = document.getElementById('lista-clientes');
+        try {
+            const snap = await db.collection('clientes').orderBy('criado','desc').get();
+            if (snap.empty) { container.innerHTML = '<div style="color:#333;font-size:0.65rem;padding:12px 0;">Nenhum cliente cadastrado.</div>'; return; }
+            const agora = Date.now();
+            container.innerHTML = snap.docs.map(d => {
+                const c = d.data();
+                const sc = c.ativo ? '#2a7a2a' : '#7a2a2a';
+                const st = c.ativo ? 'ATIVO' : 'INATIVO';
+                let badge = '';
+                if (c.token) {
+                    const exp = c.tokenExpira||0, dias = Math.ceil((exp-agora)/86400000);
+                    if (exp<agora)    badge = `<span style="color:#ff4444;font-size:0.55rem;border:1px solid #ff4444;padding:1px 6px;border-radius:10px;">EXPIRADO</span>`;
+                    else if(dias<=7)  badge = `<span style="color:#f59e0b;font-size:0.55rem;border:1px solid #f59e0b;padding:1px 6px;border-radius:10px;">VENCE ${dias}d</span>`;
+                    else              badge = `<span style="color:#22c55e;font-size:0.55rem;border:1px solid #22c55e;padding:1px 6px;border-radius:10px;">✓ ${dias}d</span>`;
+                } else badge = `<span style="color:#444;font-size:0.55rem;border:1px solid #333;padding:1px 6px;border-radius:10px;">SEM TOKEN</span>`;
+                return `<div style="border:1px solid #1a1a1a;border-radius:6px;padding:12px;margin-bottom:8px;background:#000;cursor:pointer;"
+                    onclick="abrirDetalhes('${d.id}')"
+                    onmouseover="this.style.borderColor='#3a3a1a'" onmouseout="this.style.borderColor='#1a1a1a'">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                        <span style="color:var(--primary);font-size:0.8rem;font-weight:700;font-family:'Cinzel',serif;">${c.nome||'—'}</span>
+                        <span style="color:${sc};font-size:0.55rem;border:1px solid ${sc};padding:1px 6px;border-radius:10px;">${st}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div style="color:#555;font-size:0.6rem;">${c.dono||''}</div>
+                        <div style="display:flex;gap:5px;align-items:center;">${badge}<span style="color:#333;font-size:0.6rem;">›</span></div>
+                    </div>
+                </div>`;
+            }).join('');
+        } catch(e) { container.innerHTML = '<div style="color:#ff4444;font-size:0.65rem;">ERRO: '+e.message+'</div>'; }
+    }
+
+    function copiarTexto(txt) {
+        if (!txt) return;
+        navigator.clipboard.writeText(txt).then(() => alert('COPIADO!\n'+txt));
+    }
+
+    // ── TOKEN (modal antigo, mantido por compatibilidade) ──
+    let _tokenClienteId = null;
+    async function abrirModalToken(id) {
+        _tokenClienteId = id;
+        const snap = await db.collection('clientes').doc(id).get();
+        const c = snap.data();
+        document.getElementById('modal-titulo').textContent = c.token ? '> RENOVAR_TOKEN: '+(c.nome||id) : '> GERAR_TOKEN: '+(c.nome||id);
+        document.getElementById('modal-cliente-info').textContent = 'Dono: '+(c.dono||'—')+(c.whatsapp?' · '+c.whatsapp:'');
+        document.getElementById('modal-plano').value = '30';
+        document.getElementById('modal-token-input').value = c.token||'';
+        document.getElementById('modal-token-gerado').style.display = 'none';
+        document.getElementById('modal-custom-wrap').style.display = 'none';
+        document.getElementById('modal-token').classList.add('open');
+    }
+    function fecharModalToken() { document.getElementById('modal-token').classList.remove('open'); _tokenClienteId=null; loadClientes(); }
+    function toggleCustomDias() { document.getElementById('modal-custom-wrap').style.display = document.getElementById('modal-plano').value==='custom'?'block':'none'; }
+    function gerarTokenAleatorio() {
+        const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        const part=()=>Array.from({length:4},()=>chars[Math.floor(Math.random()*chars.length)]).join('');
+        return `${part()}-${part()}-${part()}-${part()}`;
+    }
+    async function confirmarToken() {
+        if(!_tokenClienteId) return;
+        const plano = document.getElementById('modal-plano').value;
+        let dias = parseInt(plano);
+        if(plano==='custom'){ dias=parseInt(document.getElementById('modal-dias-custom').value); if(!dias||dias<1){alert('Informe os dias!');return;} }
+        const t = document.getElementById('modal-token-input').value.trim().toUpperCase() || gerarTokenAleatorio();
+        const exp = Date.now()+dias*86400000;
+        try {
+            await db.collection('clientes').doc(_tokenClienteId).update({token:t,tokenExpira:exp,tokenDias:dias,tokenAtualizadoEm:new Date()});
+            document.getElementById('modal-token-valor').textContent = t;
+            document.getElementById('modal-expira-info').textContent = `> Válido por ${dias} dias · Expira em ${new Date(exp).toLocaleDateString('pt-BR')}`;
+            document.getElementById('modal-token-gerado').style.display = 'block';
+            navigator.clipboard.writeText(t).catch(()=>{});
+        } catch(e) { alert('ERRO: '+e.message); }
+    }
+    function copiarTokenModal() {
+        const t = document.getElementById('modal-token-valor').textContent;
+        navigator.clipboard.writeText(t).then(()=>{ const el=document.getElementById('modal-token-valor'); el.style.color='#00ff88'; setTimeout(()=>el.style.color='var(--primary)',800); });
+    }
+
+    // ── MODAL DETALHES ──
+    let _detId = null;
+    async function abrirDetalhes(id) {
+        _detId = id;
+        const snap = await db.collection('clientes').doc(id).get();
+        if (!snap.exists) return;
+        const c = snap.data(); const agora = Date.now();
+        document.getElementById('det-nome').textContent = c.nome||'—';
+        document.getElementById('det-sub').textContent  = (c.dono||'')+(c.whatsapp?' · '+c.whatsapp:'');
+        const badge = document.getElementById('det-status-badge');
+        if(c.ativo){badge.textContent='● ATIVO';badge.className='det-token-badge det-status-ativo';}
+        else{badge.textContent='● INATIVO';badge.className='det-token-badge det-status-expirado';}
+        const btn = document.getElementById('det-btn-toggle');
+        btn.textContent = c.ativo?'🔒 BLOQUEAR':'✅ ATIVAR';
+        btn.style.borderColor = c.ativo?'#5a1a1a':'#1a5a1a';
+        btn.style.color = c.ativo?'#ff6666':'#66ff88';
+        document.getElementById('det-link-index').textContent = c.linkIndex||'—';
+        document.getElementById('det-link-admin').textContent = c.linkAdmin||'—';
+        document.getElementById('det-id').textContent = id;
+        const tokenRow = document.getElementById('det-token-row');
+        const tokenInfo = document.getElementById('det-token-info');
+        if(c.token){
+            const exp=c.tokenExpira||0, dias=Math.ceil((exp-agora)/86400000);
+            tokenRow.style.display='flex';
+            document.getElementById('det-token-val').textContent=c.token;
+            if(exp<agora) tokenInfo.innerHTML=`<span class="det-token-badge det-status-expirado">EXPIRADO em ${new Date(exp).toLocaleDateString('pt-BR')}</span>`;
+            else if(dias<=7) tokenInfo.innerHTML=`<span class="det-token-badge det-status-expira">VENCE EM ${dias} dias</span>`;
+            else tokenInfo.innerHTML=`<span class="det-token-badge det-status-ativo">✓ ATIVO · ${dias}d · expira ${new Date(exp).toLocaleDateString('pt-BR')}</span>`;
+        } else {
+            tokenRow.style.display='none';
+            tokenInfo.innerHTML=`<span class="det-token-badge det-status-sem">Nenhum token gerado</span>`;
+        }
+        document.getElementById('det-plano').value='30';
+        document.getElementById('det-token-input').value=c.token||'';
+        document.getElementById('det-custom-wrap').style.display='none';
+        document.getElementById('det-token-gerado').style.display='none';
+        try {
+            const pix = await db.collection('clientes').doc(id).collection('configuracao').doc('config').get();
+            const pk = pix.exists&&pix.data().pixKey?pix.data().pixKey:'';
+            document.getElementById('det-pix-atual').textContent=pk||'—';
+            document.getElementById('det-pix-input').value=pk;
+        } catch(e){ document.getElementById('det-pix-atual').textContent='—'; }
+        document.getElementById('det-edit-nome').value=c.nome||'';
+        document.getElementById('det-edit-dono').value=c.dono||'';
+        document.getElementById('det-edit-whats').value=c.whatsapp||'';
+        ['det-pix-feedback','det-dados-feedback'].forEach(i=>{ document.getElementById(i).style.display='none'; });
+        document.getElementById('modal-detalhes').classList.add('open');
+    }
+    function fecharDetalhes() { document.getElementById('modal-detalhes').classList.remove('open'); _detId=null; loadClientes(); }
+    function copiarDet(elId) {
+        const t=document.getElementById(elId).textContent; if(!t||t==='—') return;
+        navigator.clipboard.writeText(t).then(()=>{ const el=document.getElementById(elId),o=el.style.color; el.style.color='#00ff88'; setTimeout(()=>el.style.color=o,700); });
+    }
+    function copiarDetTxt(el) { navigator.clipboard.writeText(el.textContent).then(()=>{ const o=el.style.color; el.style.color='#00ff88'; setTimeout(()=>el.style.color=o,700); }); }
+    function detToggleCustom() { document.getElementById('det-custom-wrap').style.display=document.getElementById('det-plano').value==='custom'?'block':'none'; }
+    async function detConfirmarToken() {
+        if(!_detId) return;
+        const plano=document.getElementById('det-plano').value; let dias=parseInt(plano);
+        if(plano==='custom'){dias=parseInt(document.getElementById('det-dias-custom').value);if(!dias||dias<1){alert('Informe os dias!');return;}}
+        const t=document.getElementById('det-token-input').value.trim().toUpperCase()||gerarTokenAleatorio();
+        const exp=Date.now()+dias*86400000;
+        try {
+            await db.collection('clientes').doc(_detId).update({token:t,tokenExpira:exp,tokenDias:dias,tokenAtualizadoEm:new Date()});
+            document.getElementById('det-token-val').textContent=t;
+            document.getElementById('det-token-row').style.display='flex';
+            document.getElementById('det-token-gerado-val').textContent=t;
+            document.getElementById('det-token-gerado-exp').textContent=`> Válido por ${dias} dias · Expira em ${new Date(exp).toLocaleDateString('pt-BR')}`;
+            document.getElementById('det-token-gerado').style.display='block';
+            document.getElementById('det-token-info').innerHTML=`<span class="det-token-badge det-status-ativo">✓ ATIVO · ${dias}d · expira ${new Date(exp).toLocaleDateString('pt-BR')}</span>`;
+            navigator.clipboard.writeText(t).catch(()=>{});
+        } catch(e){alert('ERRO: '+e.message);}
+    }
+    async function detSalvarPix() {
+        if(!_detId) return;
+        const val=document.getElementById('det-pix-input').value.trim(); if(!val){alert('Digite a chave PIX!');return;}
+        const fb=document.getElementById('det-pix-feedback');
+        try {
+            await db.collection('clientes').doc(_detId).collection('configuracao').doc('config').set({pixKey:val},{merge:true});
+            document.getElementById('det-pix-atual').textContent=val;
+            fb.textContent='✓ Chave PIX salva!'; fb.className='det-feedback ok'; fb.style.display='block';
+            setTimeout(()=>fb.style.display='none',3000);
+        } catch(e){fb.textContent='Erro: '+e.message;fb.className='det-feedback err';fb.style.display='block';}
+    }
+    async function detSalvarDados() {
+        if(!_detId) return;
+        const nome=document.getElementById('det-edit-nome').value.trim().toUpperCase();
+        const dono=document.getElementById('det-edit-dono').value.trim();
+        const whats=document.getElementById('det-edit-whats').value.trim();
+        if(!nome){alert('Nome é obrigatório!');return;}
+        const fb=document.getElementById('det-dados-feedback');
+        try {
+            await db.collection('clientes').doc(_detId).update({nome,dono,whatsapp:whats});
+            document.getElementById('det-nome').textContent=nome;
+            document.getElementById('det-sub').textContent=dono+(whats?' · '+whats:'');
+            fb.textContent='✓ Dados salvos!'; fb.className='det-feedback ok'; fb.style.display='block';
+            setTimeout(()=>fb.style.display='none',3000);
+        } catch(e){fb.textContent='Erro: '+e.message;fb.className='det-feedback err';fb.style.display='block';}
+    }
+    async function detToggleAtivo() {
+        if(!_detId) return;
+        const snap=await db.collection('clientes').doc(_detId).get();
+        const novo=!snap.data().ativo;
+        await db.collection('clientes').doc(_detId).update({ativo:novo});
+        const badge=document.getElementById('det-status-badge'),btn=document.getElementById('det-btn-toggle');
+        if(novo){badge.textContent='● ATIVO';badge.className='det-token-badge det-status-ativo';btn.textContent='🔒 BLOQUEAR';btn.style.borderColor='#5a1a1a';btn.style.color='#ff6666';}
+        else{badge.textContent='● INATIVO';badge.className='det-token-badge det-status-expirado';btn.textContent='✅ ATIVAR';btn.style.borderColor='#1a5a1a';btn.style.color='#66ff88';}
+    }
+    async function detExcluir() {
+        if(!_detId) return;
+        const nome=document.getElementById('det-nome').textContent;
+        if(!confirm(`Excluir "${nome}"?\n\nEsta ação não pode ser desfeita.`)) return;
+        try { await db.collection('clientes').doc(_detId).delete(); fecharDetalhes(); } catch(e){alert('ERRO: '+e.message);}
+    }
+    document.getElementById('modal-detalhes').addEventListener('click',function(e){if(e.target===this)fecharDetalhes();});
+
+    // ── PIX GLOBAL ──
+    async function loadPix() {
+        const el=document.getElementById('pix-atual');
+        try { const d=await db.collection('configuracao').doc('config').get(); el.textContent=d.exists&&d.data().pixKey?d.data().pixKey:'Não configurada'; el.style.color='var(--primary)'; }
+        catch(e){el.textContent='ERRO: '+e.message;}
+    }
+    async function salvarPix() {
+        const val=document.getElementById('pix-input').value.trim(); if(!val){alert('Digite a chave PIX!');return;}
+        try {
+            await db.collection('configuracao').doc('config').set({pixKey:val},{merge:true});
+            document.getElementById('pix-atual').textContent=val;
+            document.getElementById('pix-input').value='';
+            const fb=document.getElementById('pix-feedback'); fb.style.display='block';
+            setTimeout(()=>fb.style.display='none',3000);
+        } catch(e){alert('ERRO: '+e.message);}
+    }
+
 </script>
 </body>
 </html>

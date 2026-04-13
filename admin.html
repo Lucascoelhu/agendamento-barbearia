@@ -1467,58 +1467,57 @@ async function excluirBloqueioDireto(id) {
     }
 
     async function validarCodigoAtivacao() {
-    const cod = document.getElementById('input-codigo-ativacao').value.trim();
+    const cod = document.getElementById('input-codigo-ativacao').value.trim().toUpperCase();
     if (!cod) return alert("Digite um código.");
-    
+
     try {
-        // codigos_ativacao é coleção GLOBAL — usa _db direto
+        const agora = Date.now();
+
+        // ── ESTRATÉGIA 1: Token do ativador (salvo em clientes/{id}.token) ──
+        const clienteSnap = await _db.collection('clientes').doc(_clienteId).get();
+        if (clienteSnap.exists) {
+            const cliente = clienteSnap.data();
+            if (cliente.token && cliente.token.toUpperCase() === cod) {
+                const expira = cliente.tokenExpira || 0;
+                if (expira < agora) {
+                    alert("⏳ Token expirado! Peça ao administrador para renovar.");
+                    return;
+                }
+                // Token válido — ativa a assinatura usando a data de expiração do token
+                const assinaRef = db.collection("configuracao").doc("assinatura");
+                await assinaRef.set({ premiumAte: new Date(expira) }, { merge: true });
+                alert("✅ Assinatura ativada! Válida até " + new Date(expira).toLocaleDateString('pt-BR'));
+                location.reload();
+                return;
+            }
+        }
+
+        // ── ESTRATÉGIA 2: Código antigo (coleção global codigos_ativacao) ──
         const docRef = _db.collection("codigos_ativacao").doc(cod);
         const docSnap = await docRef.get();
-        
+
         if (docSnap.exists) {
             const dados = docSnap.data();
-            
-            if (dados.usado === false) {
-                // 1. Busca a assinatura atual para ver se ainda tem dias
-                const assinaRef = db.collection("configuracao").doc("assinatura");
-                const assinaSnap = await assinaRef.get();
-                
-                let dataBase = new Date(); // Começa com "Hoje"
-                const agora = new Date();
+            if (dados.usado === true) { alert("Este código já foi utilizado."); return; }
 
-                if (assinaSnap.exists && assinaSnap.data().premiumAte) {
-                    const dataVencimentoAtual = assinaSnap.data().premiumAte.toDate();
-
-                    // LÓGICA ACUMULATIVA:
-                    // Se o que ele tem ainda não venceu (ex: faltam 2 dias), 
-                    // a gente soma os 30 dias em cima desses 2 dias.
-                    if (dataVencimentoAtual > agora) {
-                        dataBase = dataVencimentoAtual;
-                    }
-                }
-
-                // 2. Soma os 30 dias à data base (seja hoje ou o vencimento futuro)
-                const novos30Dias = 30 * 24 * 60 * 60 * 1000;
-                const novaDataFinal = new Date(dataBase.getTime() + novos30Dias);
-
-                // 3. Atualiza o banco de dados
-                await assinaRef.set({ 
-                    premiumAte: novaDataFinal 
-                }, { merge: true });
-
-                await docRef.update({ usado: true, dataUso: agora });
-
-                alert("Assinatura Renovada! Dias somados com sucesso."); 
-                location.reload(); 
-
-            } else { 
-                alert("Este código já foi utilizado."); 
+            const assinaRef = db.collection("configuracao").doc("assinatura");
+            const assinaSnap = await assinaRef.get();
+            let dataBase = new Date();
+            if (assinaSnap.exists && assinaSnap.data().premiumAte) {
+                const atual = assinaSnap.data().premiumAte.toDate();
+                if (atual > new Date()) dataBase = atual;
             }
-        } else { 
-            alert("Código não encontrado."); 
+            const dias = dados.dias || 30;
+            const novaData = new Date(dataBase.getTime() + dias * 24 * 60 * 60 * 1000);
+            await assinaRef.set({ premiumAte: novaData }, { merge: true });
+            await docRef.update({ usado: true, dataUso: new Date() });
+            alert("✅ Assinatura renovada! " + dias + " dias somados com sucesso.");
+            location.reload();
+        } else {
+            alert("❌ Código não encontrado. Verifique o token e tente novamente.");
         }
-    } catch (e) { 
-        alert("Erro na ativação: " + e.message); 
+    } catch (e) {
+        alert("Erro na ativação: " + e.message);
     }
 }
 

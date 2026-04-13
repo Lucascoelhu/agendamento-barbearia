@@ -616,8 +616,10 @@
     });
 
     // Proxy do db que prefixa todas as coleções com clientes/{id}/
+    // Retorna a CollectionReference real do Firestore para compatibilidade total
     const db = {
-        collection: (col) => _db.collection('clientes').doc(_clienteId).collection(col)
+        collection: (col) => _db.collection('clientes').doc(_clienteId).collection(col),
+        batch: () => _db.batch()
     };
 
     // ══════════════════════════════════════
@@ -771,7 +773,7 @@ async function limparAgendamentosConcluidos() {
             .where("data", "<=", hojeISO)
             .get();
         
-        const batch = _db.batch();
+        const batch = db.batch();
         let houveAlteracao = false;
 
         snap.forEach((doc) => {
@@ -917,7 +919,7 @@ async function limparAgendamentosAntigos() {
             return;
         }
 
-        const batch = _db.batch();
+        const batch = db.batch();
         let contador = 0;
 
         snap.forEach((doc) => {
@@ -976,7 +978,7 @@ function agendarProximaLimpeza() {
             if(dataEsp < hj) return alert("Você não pode bloquear uma data que já passou!");
         }
         
-        const batch = _db.batch(); // Inicia gravação em lote
+        const batch = db.batch(); // Inicia gravação em lote
         
         horas.forEach(h => {
             const ref = db.collection("bloqueios").doc();
@@ -1222,7 +1224,7 @@ async function excluirBloqueioDireto(id) {
         
         if(!confirm(`Deseja remover todos os ${ids.length} horários bloqueados deste dia?`)) return;
         
-        const batch = _db.batch();
+        const batch = db.batch();
         
         ids.forEach(id => {
             const ref = db.collection("bloqueios").doc(id);

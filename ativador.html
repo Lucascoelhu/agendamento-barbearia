@@ -166,7 +166,7 @@
     <!-- Tab buttons -->
     <div style="display:flex; gap:8px; margin-bottom:20px;">
         <button id="btn-tab-gen" onclick="switchTab('gen')" style="flex:1; padding:8px; font-size:0.65rem; background: var(--primary); color:#000; border-color: var(--primary);">[ GERAR_CHAVE ]</button>
-        <button id="btn-tab-cfg" onclick="switchTab('cfg')" style="flex:1; padding:8px; font-size:0.65rem; background: transparent; color: var(--primary);">[ CONFIG_SYS ]</button>
+        <button id="btn-tab-cfg" onclick="switchTab('cfg')" style="flex:1; padding:8px; font-size:0.65rem; background: transparent; color: var(--primary);">[ CLIENTES ]</button>
     </div>
 
     <!-- Seção: Gerar Código -->
@@ -184,28 +184,59 @@
         </div>
     </div>
 
-    <!-- Seção: Configurações -->
+    <!-- Seção: Clientes -->
     <div id="section-cfg" style="display:none;">
-        <h2 style="font-size:1rem; margin-bottom:4px;">CONFIG_SYS</h2>
-        <div class="status">> PARÂMETROS DO SISTEMA...</div>
+        <h2 style="font-size:1rem; margin-bottom:4px;">CLIENTES_SYS</h2>
+        <div class="status">> GERENCIAR BARBEARIAS CADASTRADAS...</div>
 
-        <div style="margin-bottom: 20px;">
-            <div class="log" style="margin-top:0; margin-bottom:8px; color:#555;">> CHAVE_PIX_ATUAL:</div>
-            <div id="pix-atual" style="padding:10px; background:#000; border:1px solid #222; color: var(--primary); font-size:0.8rem; word-break:break-all; min-height:36px;">
-                <span style="color:#333;">carregando...</span>
+        <!-- Cadastrar novo cliente -->
+        <div style="margin-bottom:16px; padding:12px; border:1px solid #1a1a1a; border-radius:4px;">
+            <div class="log" style="margin-top:0; margin-bottom:10px; color:#666;">> NOVO_CLIENTE:</div>
+            <input type="text" id="cli-nome" placeholder="NOME DA BARBEARIA"
+                style="width:100%; padding:10px; font-size:0.8rem; margin-bottom:8px; color:var(--primary); text-transform:uppercase;">
+            <input type="text" id="cli-dono" placeholder="NOME DO DONO"
+                style="width:100%; padding:10px; font-size:0.8rem; margin-bottom:8px; color:var(--primary);">
+            <input type="text" id="cli-whats" placeholder="WHATSAPP (ex: 5511999999999)"
+                style="width:100%; padding:10px; font-size:0.8rem; margin-bottom:8px; color:var(--primary);">
+            <button onclick="cadastrarCliente()" style="padding:10px; font-size:0.75rem;">[ CADASTRAR + GERAR LINKS ]</button>
+        </div>
+
+        <!-- Links gerados -->
+        <div id="links-gerados" style="display:none; margin-bottom:16px; padding:12px; border:1px solid #1a2a1a; border-radius:4px; background:#050f05;">
+            <div class="log" style="margin-top:0; margin-bottom:10px; color:#4a7a4a;">> LINKS_GERADOS ✓</div>
+            <div style="margin-bottom:8px;">
+                <div class="log" style="margin-top:0; margin-bottom:4px; color:#555;">> AGENDAMENTO (cliente):</div>
+                <div id="link-index" class="code-box" onclick="copiarLink('link-index')" style="font-size:0.65rem; word-break:break-all; padding:12px;"></div>
+            </div>
+            <div style="margin-top:16px;">
+                <div class="log" style="margin-top:0; margin-bottom:4px; color:#555;">> PAINEL ADMIN (barbearia):</div>
+                <div id="link-admin" class="code-box" onclick="copiarLink('link-admin')" style="font-size:0.65rem; word-break:break-all; padding:12px;"></div>
+            </div>
+            <div class="log" style="margin-top:16px; color:#2a5a2a; line-height:1.6;">
+                > ID: <span id="link-id" style="color:var(--primary)"></span><br>
+                > STATUS: ATIVO ✓<br>
+                > CLIQUE NOS LINKS PARA COPIAR
             </div>
         </div>
 
-        <div style="margin-bottom: 12px;">
-            <div class="log" style="margin-top:0; margin-bottom:8px; color:#555;">> NOVA_CHAVE_PIX:</div>
-            <input type="text" id="pix-input" placeholder="email, telefone ou CPF..."
-                style="width:100%; padding:10px; font-size:0.8rem; margin-bottom:0; color: var(--primary);">
+        <!-- Lista de clientes -->
+        <div>
+            <div class="log" style="margin-top:0; margin-bottom:8px; color:#555;">> CLIENTES_CADASTRADOS:</div>
+            <div id="lista-clientes" style="max-height:300px; overflow-y:auto;">
+                <div style="color:#333; font-size:0.65rem;">carregando...</div>
+            </div>
         </div>
 
-        <button onclick="salvarPix()">[ SALVAR_CHAVE_PIX ]</button>
-
-        <div id="pix-feedback" style="display:none; margin-top:12px;" class="log">
-            > STATUS: CHAVE_PIX ATUALIZADA COM SUCESSO. ✓
+        <!-- CONFIG PIX -->
+        <div style="margin-top:20px; padding-top:16px; border-top:1px solid #1a1a1a;">
+            <div class="log" style="margin-top:0; margin-bottom:8px; color:#555;">> CHAVE_PIX_GLOBAL:</div>
+            <div id="pix-atual" style="padding:10px; background:#000; border:1px solid #222; color:var(--primary); font-size:0.8rem; word-break:break-all; min-height:36px; margin-bottom:8px;">
+                <span style="color:#333;">carregando...</span>
+            </div>
+            <input type="text" id="pix-input" placeholder="email, telefone ou CPF..."
+                style="width:100%; padding:10px; font-size:0.8rem; margin-bottom:8px; color:var(--primary);">
+            <button onclick="salvarPix()" style="padding:10px; font-size:0.75rem;">[ SALVAR_CHAVE_PIX ]</button>
+            <div id="pix-feedback" style="display:none; margin-top:10px;" class="log">> STATUS: CHAVE_PIX ATUALIZADA. ✓</div>
         </div>
     </div>
 </div>
@@ -275,17 +306,110 @@
         });
     }
 
+    // ===== URL BASE DO SITE =====
+    // Altere para a URL do seu site hospedado
+    const SITE_BASE = window.location.origin + window.location.pathname.replace('ativador.html', '');
+
     // ===== ABAS =====
     function switchTab(tab) {
         const isGen = tab === 'gen';
         document.getElementById('section-gen').style.display = isGen ? 'block' : 'none';
         document.getElementById('section-cfg').style.display = isGen ? 'none' : 'block';
-        document.getElementById('tab-indicator').textContent = isGen ? '// GEN_MODE' : '// CFG_MODE';
+        document.getElementById('tab-indicator').textContent = isGen ? '// GEN_MODE' : '// CLI_MODE';
         document.getElementById('btn-tab-gen').style.background = isGen ? 'var(--primary)' : 'transparent';
         document.getElementById('btn-tab-gen').style.color      = isGen ? '#000' : 'var(--primary)';
         document.getElementById('btn-tab-cfg').style.background = isGen ? 'transparent' : 'var(--primary)';
         document.getElementById('btn-tab-cfg').style.color      = isGen ? 'var(--primary)' : '#000';
-        if(!isGen) loadPix();
+        if (!isGen) { loadClientes(); loadPix(); }
+    }
+
+    // ===== CADASTRAR CLIENTE =====
+    async function cadastrarCliente() {
+        const nome  = document.getElementById('cli-nome').value.trim().toUpperCase();
+        const dono  = document.getElementById('cli-dono').value.trim();
+        const whats = document.getElementById('cli-whats').value.trim();
+        if (!nome || !dono) { alert('ERRO: Preencha nome e dono!'); return; }
+
+        // Gera ID único para o cliente
+        const id = 'barber_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6);
+
+        const linkIndex = SITE_BASE + 'index.html?id=' + id;
+        const linkAdmin = SITE_BASE + 'admin.html?id=' + id;
+
+        try {
+            await db.collection('clientes').doc(id).set({
+                nome, dono, whatsapp: whats,
+                ativo: true,
+                linkIndex, linkAdmin,
+                criado: new Date()
+            });
+
+            // Exibir links
+            document.getElementById('link-index').textContent = linkIndex;
+            document.getElementById('link-admin').textContent = linkAdmin;
+            document.getElementById('link-id').textContent = id;
+            document.getElementById('links-gerados').style.display = 'block';
+
+            // Limpar campos
+            document.getElementById('cli-nome').value = '';
+            document.getElementById('cli-dono').value = '';
+            document.getElementById('cli-whats').value = '';
+
+            loadClientes();
+        } catch(e) { alert('ERRO: ' + e.message); }
+    }
+
+    // ===== COPIAR LINK =====
+    function copiarLink(elId) {
+        const texto = document.getElementById(elId).textContent;
+        navigator.clipboard.writeText(texto).then(() => {
+            const el = document.getElementById(elId);
+            const orig = el.style.color;
+            el.style.color = '#00ff88';
+            setTimeout(() => el.style.color = orig, 800);
+        });
+    }
+
+    // ===== LISTAR CLIENTES =====
+    async function loadClientes() {
+        const container = document.getElementById('lista-clientes');
+        try {
+            const snap = await db.collection('clientes').orderBy('criado', 'desc').get();
+            if (snap.empty) {
+                container.innerHTML = '<div style="color:#333;font-size:0.65rem;">Nenhum cliente cadastrado.</div>';
+                return;
+            }
+            container.innerHTML = snap.docs.map(d => {
+                const c = d.data();
+                const statusColor = c.ativo ? '#2a7a2a' : '#7a2a2a';
+                const statusTxt = c.ativo ? 'ATIVO' : 'INATIVO';
+                return `<div style="border:1px solid #1a1a1a; border-radius:4px; padding:10px; margin-bottom:8px; background:#000;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <span style="color:var(--primary); font-size:0.75rem; font-weight:700;">${c.nome || '—'}</span>
+                        <span style="color:${statusColor}; font-size:0.6rem; border:1px solid ${statusColor}; padding:2px 6px; border-radius:3px;">${statusTxt}</span>
+                    </div>
+                    <div style="color:#555; font-size:0.6rem; margin-bottom:4px;">Dono: ${c.dono || '—'} ${c.whatsapp ? '| WhatsApp: ' + c.whatsapp : ''}</div>
+                    <div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
+                        <button onclick="copiarTexto('${c.linkIndex}')" style="padding:5px 8px; font-size:0.6rem; flex:1;">📋 LINK CLIENTE</button>
+                        <button onclick="copiarTexto('${c.linkAdmin}')" style="padding:5px 8px; font-size:0.6rem; flex:1;">📋 LINK ADMIN</button>
+                        <button onclick="toggleCliente('${d.id}', ${!c.ativo})" style="padding:5px 8px; font-size:0.6rem; flex:1; border-color:${c.ativo ? '#7a2a2a' : '#2a7a2a'}; color:${c.ativo ? '#ff6666' : '#66ff88'};">${c.ativo ? '🔒 BLOQUEAR' : '✅ ATIVAR'}</button>
+                    </div>
+                </div>`;
+            }).join('');
+        } catch(e) {
+            container.innerHTML = '<div style="color:#ff4444;font-size:0.65rem;">ERRO: ' + e.message + '</div>';
+        }
+    }
+
+    async function toggleCliente(id, novoStatus) {
+        try {
+            await db.collection('clientes').doc(id).update({ ativo: novoStatus });
+            loadClientes();
+        } catch(e) { alert('ERRO: ' + e.message); }
+    }
+
+    function copiarTexto(txt) {
+        navigator.clipboard.writeText(txt).then(() => alert('COPIADO!\n' + txt));
     }
 
     // ===== CHAVE PIX =====

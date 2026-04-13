@@ -257,13 +257,140 @@
         .btn-cancel-modal:active { background: #111 !important; color: #888 !important; box-shadow: none !important; }
 
         /* ── CAMPOS DA SEÇÃO CLIENTES ── */
-        #section-cfg input {
-            text-align: left;
-            font-size: 0.9rem;
+        #section-cfg input { text-align: left; font-size: 0.9rem; }
+        #section-cfg button { font-size: 0.72rem; }
+
+        /* ── MODAL DETALHES CLIENTE ── */
+        .modal-detalhes {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.92);
+            z-index: 998; align-items: flex-end;
+            justify-content: center; padding: 0;
         }
-        #section-cfg button {
-            font-size: 0.72rem;
+        .modal-detalhes.open { display: flex; }
+        @media (min-width: 600px) {
+            .modal-detalhes { align-items: center; padding: 16px; }
+            .det-box { border-radius: 8px !important; }
         }
+        .det-box {
+            background: #050505;
+            border: 1px solid #2a2a1a;
+            border-top: 2px solid var(--primary);
+            border-radius: 14px 14px 0 0;
+            padding: 0;
+            width: 100%; max-width: 520px;
+            max-height: 92vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .det-header {
+            position: sticky; top: 0;
+            background: #0a0a05;
+            border-bottom: 1px solid #1a1a0a;
+            padding: 16px 18px 12px;
+            z-index: 2;
+        }
+        .det-handle {
+            width: 36px; height: 4px;
+            background: #2a2a1a; border-radius: 2px;
+            margin: 0 auto 14px;
+        }
+        .det-nome {
+            font-family: 'Cinzel', serif;
+            color: var(--primary); font-size: 1rem;
+            letter-spacing: 2px; margin: 0 0 2px 0;
+        }
+        .det-sub { font-size: 0.6rem; color: #555; }
+        .det-body { padding: 16px 18px 32px; }
+        .det-section {
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+        .det-section-title {
+            background: #0f0f0a;
+            padding: 8px 12px;
+            font-size: 0.6rem;
+            color: #666;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .det-section-body { padding: 12px; }
+        .det-row {
+            display: flex; align-items: center;
+            gap: 8px; margin-bottom: 8px;
+        }
+        .det-row:last-child { margin-bottom: 0; }
+        .det-label { font-size: 0.58rem; color: #444; min-width: 60px; }
+        .det-val {
+            flex: 1; font-size: 0.7rem; color: var(--primary);
+            word-break: break-all; line-height: 1.4;
+        }
+        .det-copy-btn {
+            padding: 5px 8px !important; min-height: 32px !important;
+            font-size: 0.6rem !important; width: auto !important;
+            flex-shrink: 0; border-color: #2a2a1a !important;
+            color: #888 !important;
+        }
+        .det-copy-btn:active { background: #1a1a0a !important; }
+        .det-input {
+            width: 100%; padding: 11px 12px;
+            background: #000; border: 1px solid #222;
+            color: var(--primary); font-family: 'Fira Code', monospace;
+            font-size: 0.9rem; border-radius: 3px;
+            margin-bottom: 8px; -webkit-appearance: none;
+            outline: none;
+        }
+        .det-input:focus { border-color: var(--primary); }
+        .det-select {
+            width: 100%; padding: 11px 32px 11px 12px;
+            background: #000; border: 1px solid #222;
+            color: var(--primary); font-family: 'Fira Code', monospace;
+            font-size: 0.9rem; border-radius: 3px;
+            margin-bottom: 8px; -webkit-appearance: none;
+            outline: none; cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23c5a059'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+        .det-btn {
+            width: 100%; padding: 12px;
+            min-height: 46px; font-size: 0.72rem;
+            border-radius: 3px; font-weight: 700;
+            cursor: pointer; font-family: 'Fira Code', monospace;
+            text-transform: uppercase; transition: all 0.2s;
+            -webkit-appearance: none;
+        }
+        .det-btn-primary {
+            background: var(--primary); color: #000;
+            border: 1px solid var(--primary);
+        }
+        .det-btn-outline {
+            background: transparent; color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        .det-btn-danger {
+            background: transparent; color: #ff6666;
+            border: 1px solid #5a1a1a;
+        }
+        .det-btn:active { opacity: 0.8; transform: scale(0.98); }
+        .det-token-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 10px; border-radius: 20px;
+            font-size: 0.6rem; font-weight: 700;
+        }
+        .det-status-ativo   { color:#22c55e; border:1px solid #22c55e; background:rgba(34,197,94,.07); }
+        .det-status-expira  { color:#f59e0b; border:1px solid #f59e0b; background:rgba(245,158,11,.07); }
+        .det-status-expirado{ color:#ff4444; border:1px solid #ff4444; background:rgba(255,68,68,.07); }
+        .det-status-sem     { color:#444;    border:1px solid #333;    background:transparent; }
+        .det-feedback {
+            display: none; padding: 8px 10px;
+            font-size: 0.65rem; border-radius: 4px;
+            margin-top: 8px; text-align: center;
+        }
+        .det-feedback.ok  { color:#22c55e; background:rgba(34,197,94,.08); border:1px solid #1a4a1a; }
+        .det-feedback.err { color:#ff4444; background:rgba(255,68,68,.08); border:1px solid #4a1a1a; }
     </style>
 </head>
 <body>
@@ -357,6 +484,924 @@
             <div id="pix-feedback" style="display:none; margin-top:10px;" class="log">> STATUS: CHAVE_PIX ATUALIZADA. ✓</div>
         </div>
     </div>
+</div>
+
+<!-- MODAL: DETALHES DO CLIENTE -->
+<div class="modal-detalhes" id="modal-detalhes">
+  <div class="det-box">
+    <div class="det-header">
+      <div class="det-handle"></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div class="det-nome" id="det-nome">—</div>
+          <div class="det-sub" id="det-sub">—</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span id="det-status-badge" class="det-token-badge"></span>
+          <button onclick="fecharDetalhes()" style="width:auto;min-height:32px;padding:4px 10px;font-size:0.65rem;border-color:#333;color:#666;">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="det-body">
+
+      <!-- LINKS -->
+      <div class="det-section">
+        <div class="det-section-title">> LINKS DE ACESSO</div>
+        <div class="det-section-body">
+          <div class="det-row">
+            <div class="det-label">📱 Cliente</div>
+            <div class="det-val" id="det-link-index" style="font-size:0.6rem;"></div>
+            <button class="det-copy-btn" onclick="copiarDet('det-link-index')">📋</button>
+          </div>
+          <div class="det-row">
+            <div class="det-label">⚙️ Admin</div>
+            <div class="det-val" id="det-link-admin" style="font-size:0.6rem;"></div>
+            <button class="det-copy-btn" onclick="copiarDet('det-link-admin')">📋</button>
+          </div>
+          <div class="det-row">
+            <div class="det-label">🆔 ID</div>
+            <div class="det-val" id="det-id" style="font-size:0.58rem;color:#555;"></div>
+            <button class="det-copy-btn" onclick="copiarDet('det-id')">📋</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOKEN -->
+      <div class="det-section">
+        <div class="det-section-title">> TOKEN DE ACESSO MENSAL</div>
+        <div class="det-section-body">
+          <div id="det-token-info" style="margin-bottom:10px;"></div>
+          <div class="det-row" id="det-token-row" style="display:none;">
+            <div class="det-label">Token</div>
+            <div class="det-val" id="det-token-val" style="letter-spacing:2px;"></div>
+            <button class="det-copy-btn" onclick="copiarDet('det-token-val')">📋</button>
+          </div>
+          <label style="display:block;font-size:0.58rem;color:#555;margin-bottom:5px;">> PLANO</label>
+          <select class="det-select" id="det-plano" onchange="detToggleCustom()">
+            <option value="30">30 dias — Mensal</option>
+            <option value="90">90 dias — Trimestral</option>
+            <option value="365">365 dias — Anual</option>
+            <option value="custom">Personalizado</option>
+          </select>
+          <div id="det-custom-wrap" style="display:none;">
+            <input type="number" class="det-input" id="det-dias-custom" placeholder="Número de dias (ex: 60)" min="1">
+          </div>
+          <label style="display:block;font-size:0.58rem;color:#555;margin-bottom:5px;">> TOKEN (deixe vazio para gerar novo automaticamente)</label>
+          <input type="text" class="det-input" id="det-token-input"
+            placeholder="XXXX-XXXX-XXXX-XXXX"
+            oninput="this.value=this.value.toUpperCase()" style="letter-spacing:2px;">
+          <button class="det-btn det-btn-primary" onclick="detConfirmarToken()">🔑 CONFIRMAR TOKEN</button>
+          <div id="det-token-gerado" style="display:none;margin-top:10px;padding:12px;background:#000;border:1px solid #1a3a1a;border-radius:4px;text-align:center;">
+            <div style="font-size:0.55rem;color:#2a6a2a;margin-bottom:6px;">> TOKEN SALVO ✓ — toque para copiar</div>
+            <div id="det-token-gerado-val" onclick="copiarDetTxt(this)" style="color:var(--primary);font-size:0.95rem;font-weight:700;letter-spacing:3px;cursor:pointer;padding:6px;"></div>
+            <div id="det-token-gerado-exp" style="font-size:0.55rem;color:#444;margin-top:4px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHAVE PIX DO CLIENTE -->
+      <div class="det-section">
+        <div class="det-section-title">> CHAVE PIX DO CLIENTE</div>
+        <div class="det-section-body">
+          <div id="det-pix-atual" style="padding:10px;background:#000;border:1px solid #1a1a1a;border-radius:3px;font-size:0.75rem;color:var(--primary);word-break:break-all;margin-bottom:8px;min-height:36px;"></div>
+          <input type="text" class="det-input" id="det-pix-input" placeholder="email, telefone, CPF ou chave aleatória">
+          <button class="det-btn det-btn-outline" onclick="detSalvarPix()">💳 SALVAR CHAVE PIX</button>
+          <div class="det-feedback" id="det-pix-feedback"></div>
+        </div>
+      </div>
+
+      <!-- DADOS DO CLIENTE -->
+      <div class="det-section">
+        <div class="det-section-title">> DADOS DO CLIENTE</div>
+        <div class="det-section-body">
+          <label style="display:block;font-size:0.58rem;color:#555;margin-bottom:5px;">> NOME DA BARBEARIA</label>
+          <input type="text" class="det-input" id="det-edit-nome" oninput="this.value=this.value.toUpperCase()">
+          <label style="display:block;font-size:0.58rem;color:#555;margin-bottom:5px;">> NOME DO DONO</label>
+          <input type="text" class="det-input" id="det-edit-dono">
+          <label style="display:block;font-size:0.58rem;color:#555;margin-bottom:5px;">> WHATSAPP</label>
+          <input type="text" class="det-input" id="det-edit-whats" placeholder="5511999999999">
+          <button class="det-btn det-btn-outline" onclick="detSalvarDados()" style="margin-bottom:8px;">💾 SALVAR DADOS</button>
+          <div class="det-feedback" id="det-dados-feedback"></div>
+        </div>
+      </div>
+
+      <!-- AÇÕES -->
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="det-btn" id="det-btn-toggle" onclick="detToggleAtivo()" style="flex:1;font-size:0.68rem;">🔒 BLOQUEAR</button>
+        <button class="det-btn det-btn-danger" onclick="detExcluir()" style="flex:1;font-size:0.68rem;">🗑 EXCLUIR</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: GERAR/RENOVAR TOKEN -->
+<div class="modal-token" id="modal-token">
+    <div class="modal-box">
+        <h3 id="modal-titulo">> GERAR_TOKEN_MENSAL</h3>
+        <div id="modal-cliente-info" style="font-size:0.65rem; color:#666; margin-bottom:4px;"></div>
+
+        <label>> PLANO</label>
+        <select id="modal-plano" onchange="toggleCustomDias()">
+            <option value="30">30 dias — Mensal</option>
+            <option value="90">90 dias — Trimestral</option>
+            <option value="365">365 dias — Anual</option>
+            <option value="custom">Personalizado</option>
+        </select>
+
+        <div id="modal-custom-wrap" style="display:none;">
+            <label>> DIAS PERSONALIZADOS</label>
+            <input type="number" id="modal-dias-custom" placeholder="Ex: 60" min="1" max="3650">
+        </div>
+
+        <label>> TOKEN ATUAL (deixe em branco para gerar novo)</label>
+        <input type="text" id="modal-token-input" placeholder="XXXX-XXXX-XXXX-XXXX (opcional)"
+            oninput="this.value=this.value.toUpperCase()" style="letter-spacing:2px;">
+
+        <div id="modal-token-gerado" style="display:none; margin-top:16px; padding:14px; background:#000; border:1px solid #1a3a1a; border-radius:4px;">
+            <div style="font-size:0.55rem; color:#2a6a2a; margin-bottom:6px;">> TOKEN_GERADO ✓ — CLIQUE PARA COPIAR</div>
+            <div id="modal-token-valor" onclick="copiarTokenModal()" style="color:var(--primary); font-size:0.9rem; font-weight:700; letter-spacing:3px; text-align:center; cursor:pointer; padding:8px;"></div>
+            <div id="modal-expira-info" style="font-size:0.55rem; color:#444; margin-top:6px; text-align:center;"></div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-cancel-modal" onclick="fecharModalToken()">[ CANCELAR ]</button>
+            <button onclick="confirmarToken()">[ CONFIRMAR ]</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Lógica de Acesso ---
+    function verificarSenha() {
+        const senha = document.getElementById('pass-input').value;
+        if (senha === 'coelhus') {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-terminal').style.display = 'block';
+        } else {
+            alert("SENHA INCORRETA. ACESSO NEGADO.");
+            document.getElementById('pass-input').value = "";
+        }
+    }
+
+    function checkEnter(event) {
+        if (event.key === "Enter") verificarSenha();
+    }
+
+    // --- Lógica do Terminal ---
+    const firebaseConfig = { 
+        apiKey: "AIzaSyCpgSr9MCmJvylVZgS0Acj0_u8UT8tkl-o",
+        authDomain: "projeto-agend-barber.firebaseapp.com",
+        projectId: "projeto-agend-barber",
+        storageBucket: "projeto-agend-barber.firebasestorage.app",
+        messagingSenderId: "368845787419",
+        appId: "1:368845787419:web:cc902e9081e3a35cac2ae1"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    async function gerarCodigo() {
+        const part1 = Math.random().toString(36).substring(2, 6).toUpperCase();
+        const part2 = Math.random().toString(36).substring(2, 6).toUpperCase();
+        const novoCodigo = `EL-NGR-${part1}-${part2}`;
+        
+        try {
+            await db.collection("codigos_ativacao").doc(novoCodigo).set({
+                usado: false,
+                dataCriacao: new Date(),
+                dias: 30
+            });
+            
+            document.getElementById('output-zone').style.display = 'block';
+            document.getElementById('resultado').innerText = novoCodigo;
+            
+        } catch (e) {
+            alert("ERRO_SISTEMA: " + e.message);
+        }
+    }
+
+    function copiarCodigo() {
+        const texto = document.getElementById('resultado').innerText;
+        if(!texto) return;
+        navigator.clipboard.writeText(texto).then(() => {
+            const res = document.getElementById('resultado');
+            const originalColor = res.style.color;
+            res.style.color = "#00ff88";
+            res.style.borderColor = "#00ff88";
+            setTimeout(() => { 
+                res.style.color = originalColor;
+                res.style.borderColor = "var(--primary-glow)";
+                alert("CHAVE COPIADA COM SUCESSO!");
+            }, 300);
+        });
+    }
+
+    // ===== URL BASE DO SITE =====
+    // Altere para a URL do seu site hospedado
+    const SITE_BASE = window.location.origin + window.location.pathname.replace('ativador.html', '');
+
+    // ===== ABAS =====
+    function switchTab(tab) {
+        const isGen = tab === 'gen';
+        document.getElementById('section-gen').style.display = isGen ? 'block' : 'none';
+        document.getElementById('section-cfg').style.display = isGen ? 'none' : 'block';
+        document.getElementById('tab-indicator').textContent = isGen ? '// GEN_MODE' : '// CLI_MODE';
+        document.getElementById('btn-tab-gen').style.background = isGen ? 'var(--primary)' : 'transparent';
+        document.getElementById('btn-tab-gen').style.color      = isGen ? '#000' : 'var(--primary)';
+        document.getElementById('btn-tab-cfg').style.background = isGen ? 'transparent' : 'var(--primary)';
+        document.getElementById('btn-tab-cfg').style.color      = isGen ? 'var(--primary)' : '#000';
+        if (!isGen) { loadClientes(); loadPix(); }
+    }
+
+    // ===== CADASTRAR CLIENTE =====
+    async function cadastrarCliente() {
+        const nome  = document.getElementById('cli-nome').value.trim().toUpperCase();
+        const dono  = document.getElementById('cli-dono').value.trim();
+        const whats = document.getElementById('cli-whats').value.trim();
+        if (!nome || !dono) { alert('ERRO: Preencha nome e dono!'); return; }
+
+        // Gera ID único para o cliente
+        const id = 'barber_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6);
+
+        const linkIndex = SITE_BASE + 'index.html?id=' + id;
+        const linkAdmin = SITE_BASE + 'admin.html?id=' + id;
+
+        try {
+            await db.collection('clientes').doc(id).set({
+                nome, dono, whatsapp: whats,
+                ativo: true,
+                linkIndex, linkAdmin,
+                criado: new Date()
+            });
+
+            // Exibir links
+            document.getElementById('link-index').textContent = linkIndex;
+            document.getElementById('link-admin').textContent = linkAdmin;
+            document.getElementById('link-id').textContent = id;
+            document.getElementById('links-gerados').style.display = 'block';
+
+            // Limpar campos
+            document.getElementById('cli-nome').value = '';
+            document.getElementById('cli-dono').value = '';
+            document.getElementById('cli-whats').value = '';
+
+            loadClientes();
+        } catch(e) { alert('ERRO: ' + e.message); }
+    }
+
+    // ===== COPIAR LINK =====
+    function copiarLink(elId) {
+        const texto = document.getElementById(elId).textContent;
+        navigator.clipboard.writeText(texto).then(() => {
+            const el = document.getElementById(elId);
+            const orig = el.style.color;
+            el.style.color = '#00ff88';
+            setTimeout(() => el.style.color = orig, 800);
+        });
+    }
+
+    // ===== LISTAR CLIENTES =====
+    async function loadClientes() {
+        const container = document.getElementById('lista-clientes');
+        try {
+            const snap = await db.collection('clientes').orderBy('criado', 'desc').get();
+            if (snap.empty) {
+                container.innerHTML = '<div style="color:#333;font-size:0.65rem;padding:12px 0;">Nenhum cliente cadastrado.</div>';
+                return;
+            }
+            const agora = Date.now();
+            container.innerHTML = snap.docs.map(d => {
+                const c = d.data();
+                const statusColor = c.ativo ? '#2a7a2a' : '#7a2a2a';
+                const statusTxt   = c.ativo ? 'ATIVO' : 'INATIVO';
+
+                // Badge do token
+                let tokenBadge = '';
+                if (c.token) {
+                    const exp = c.tokenExpira || 0;
+                    const dias = Math.ceil((exp - agora) / 86400000);
+                    if (exp < agora)      tokenBadge = `<span style="color:#ff4444;font-size:0.55rem;border:1px solid #ff4444;padding:1px 6px;border-radius:10px;">EXPIRADO</span>`;
+                    else if (dias <= 7)   tokenBadge = `<span style="color:#f59e0b;font-size:0.55rem;border:1px solid #f59e0b;padding:1px 6px;border-radius:10px;">VENCE ${dias}d</span>`;
+                    else                  tokenBadge = `<span style="color:#22c55e;font-size:0.55rem;border:1px solid #22c55e;padding:1px 6px;border-radius:10px;">✓ ${dias}d</span>`;
+                } else {
+                    tokenBadge = `<span style="color:#444;font-size:0.55rem;border:1px solid #333;padding:1px 6px;border-radius:10px;">SEM TOKEN</span>`;
+                }
+
+                return `<div style="border:1px solid #1a1a1a;border-radius:6px;padding:12px;margin-bottom:8px;background:#000;cursor:pointer;transition:border-color 0.2s;"
+                    onclick="abrirDetalhes('${d.id}')"
+                    onmouseover="this.style.borderColor='#3a3a1a'"
+                    onmouseout="this.style.borderColor='#1a1a1a'">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                        <span style="color:var(--primary);font-size:0.8rem;font-weight:700;font-family:'Cinzel',serif;letter-spacing:1px;">${c.nome||'—'}</span>
+                        <span style="color:${statusColor};font-size:0.55rem;border:1px solid ${statusColor};padding:1px 6px;border-radius:10px;">${statusTxt}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div style="color:#555;font-size:0.6rem;">${c.dono||''}</div>
+                        <div style="display:flex;gap:5px;align-items:center;">
+                            ${tokenBadge}
+                            <span style="color:#333;font-size:0.6rem;">›</span>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        } catch(e) {
+            container.innerHTML = '<div style="color:#ff4444;font-size:0.65rem;">ERRO: ' + e.message + '</div>';
+        }
+    }
+
+    function copiarTexto(txt) {
+        if (!txt) { alert('Link não disponível.'); return; }
+        navigator.clipboard.writeText(txt).then(() => alert('COPIADO!
+' + txt));
+    }leapis.com/css2?family=Fira+Code:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        :root {
+            --primary: #c5a059;
+            --primary-glow: rgba(197, 160, 89, 0.4);
+            --bg: #050505;
+            --terminal-bg: #0a0a0a;
+            --border: #1a1a1a;
+            --text: #e0e0e0;
+        }
+
+        html { height: 100%; }
+
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Fira Code', monospace; 
+            display: flex; 
+            align-items: flex-start; 
+            justify-content: center; 
+            min-height: 100%;
+            margin: 0;
+            padding: 16px 12px 40px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Scanline — desativado no mobile pra não pesar */
+        @media (min-width: 600px) {
+            body::before {
+                content: " ";
+                position: fixed;
+                inset: 0;
+                background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,.2) 50%),
+                            linear-gradient(90deg, rgba(255,0,0,.04), rgba(0,255,0,.01), rgba(0,0,255,.04));
+                background-size: 100% 4px, 3px 100%;
+                pointer-events: none;
+                z-index: 10;
+            }
+        }
+
+        /* ── LOGIN SCREEN ── */
+        #login-screen {
+            z-index: 30;
+            text-align: center;
+            width: 100%;
+            max-width: 360px;
+            padding: 20px;
+        }
+        #login-screen h2 { font-size: 1.2rem; margin-bottom: 24px; }
+        #login-screen input {
+            width: 100%;
+            font-size: 1rem;
+            padding: 14px;
+            margin-bottom: 14px;
+            border-radius: 4px;
+        }
+        #login-screen button {
+            width: auto;
+            padding: 13px 32px;
+            font-size: 0.85rem;
+            min-height: 48px;
+            border-radius: 4px;
+        }
+
+        /* ── TERMINAL ── */
+        .terminal { 
+            background: var(--terminal-bg); 
+            padding: 20px 16px;
+            border-radius: 6px; 
+            border: 1px solid var(--border); 
+            width: 100%;
+            max-width: 560px; 
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,1);
+            z-index: 20;
+            display: none;
+        }
+
+        .terminal-header {
+            color: var(--primary);
+            font-size: 0.65rem;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        h2 { 
+            font-family: 'Cinzel', serif; 
+            color: var(--primary); 
+            margin: 0 0 4px 0;
+            font-size: 1.1rem;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .status { font-size: 0.6rem; color: #444; margin-bottom: 20px; }
+
+        /* ── INPUTS GLOBAIS ── */
+        input {
+            background: #000;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem; /* evita zoom no iOS */
+            outline: none;
+            text-align: center;
+            margin-bottom: 10px;
+            border-radius: 3px;
+            -webkit-appearance: none;
+            width: 100%;
+        }
+        input::placeholder { color: #333; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 8px var(--primary-glow); }
+
+        /* ── BOTÕES ── */
+        button { 
+            background: transparent; 
+            border: 1px solid var(--primary); 
+            padding: 13px 10px;
+            min-height: 46px; /* área de toque mínima */
+            width: 100%; 
+            color: var(--primary);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.2s;
+            text-transform: uppercase;
+            border-radius: 3px;
+            -webkit-appearance: none;
+        }
+        button:active {
+            background: var(--primary);
+            color: #000;
+            transform: scale(0.97);
+        }
+        @media (hover: hover) {
+            button:hover {
+                background: var(--primary);
+                color: #000;
+                box-shadow: 0 0 15px var(--primary-glow);
+            }
+        }
+
+        /* ── TABS ── */
+        .tabs-wrap { display: flex; gap: 8px; margin-bottom: 20px; }
+        .tabs-wrap button { padding: 11px 8px; font-size: 0.7rem; }
+
+        /* ── CODE BOX ── */
+        .code-box { 
+            padding: 16px 12px 28px;
+            background: #000; 
+            color: var(--primary); 
+            border: 1px solid var(--primary-glow); 
+            font-size: 0.95rem;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            transition: 0.2s;
+            border-radius: 3px;
+            word-break: break-all;
+        }
+        .code-box:active { transform: scale(0.97); }
+        .code-box::after {
+            content: "[ toque para copiar ]";
+            position: absolute;
+            bottom: 8px;
+            left: 0; right: 0;
+            font-size: 0.55rem;
+            color: #333;
+            text-align: center;
+        }
+
+        .output-zone { margin-top: 24px; display: none; }
+
+        .log {
+            font-size: 0.6rem;
+            color: #333;
+            margin-top: 24px;
+            line-height: 1.6;
+        }
+
+        /* ── LISTA CLIENTES ── */
+        #lista-clientes { max-height: 60vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+        /* ── MODAL TOKEN ── */
+        .modal-token {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.9);
+            z-index: 999;
+            align-items: flex-end; /* sobe do fundo no mobile */
+            justify-content: center;
+            padding: 0;
+        }
+        .modal-token.open { display: flex; }
+        .modal-box {
+            background: #0a0a0a;
+            border: 1px solid var(--primary);
+            border-radius: 12px 12px 0 0; /* sheet estilo mobile */
+            padding: 24px 20px 36px;
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        /* No desktop, centraliza */
+        @media (min-width: 600px) {
+            .modal-token { align-items: center; padding: 20px; }
+            .modal-box { border-radius: 8px; }
+        }
+        .modal-box h3 {
+            color: var(--primary); font-size: 0.8rem;
+            margin: 0 0 4px 0; letter-spacing: 2px;
+        }
+        .modal-box label {
+            display: block; font-size: 0.6rem; color: #555;
+            margin-bottom: 5px; margin-top: 14px;
+        }
+        .modal-box input, .modal-box select {
+            width: 100%; padding: 13px 12px;
+            background: #000; border: 1px solid #333;
+            color: var(--primary);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem; /* evita zoom iOS */
+            border-radius: 3px;
+            -webkit-appearance: none;
+        }
+        .modal-box select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23c5a059'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+            cursor: pointer;
+        }
+        .modal-box select option { background: #0a0a0a; }
+        .modal-footer { display: flex; gap: 8px; margin-top: 20px; }
+        .modal-footer button { flex: 1; padding: 14px 8px; font-size: 0.7rem; min-height: 50px; }
+        .btn-cancel-modal { border-color: #333 !important; color: #555 !important; }
+        .btn-cancel-modal:active { background: #111 !important; color: #888 !important; box-shadow: none !important; }
+
+        /* ── CAMPOS DA SEÇÃO CLIENTES ── */
+        #section-cfg input { text-align: left; font-size: 0.9rem; }
+        #section-cfg button { font-size: 0.72rem; }
+
+        /* ── MODAL DETALHES CLIENTE ── */
+        .modal-detalhes {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.92);
+            z-index: 998; align-items: flex-end;
+            justify-content: center; padding: 0;
+        }
+        .modal-detalhes.open { display: flex; }
+        @media (min-width: 600px) {
+            .modal-detalhes { align-items: center; padding: 16px; }
+            .det-box { border-radius: 8px !important; }
+        }
+        .det-box {
+            background: #050505;
+            border: 1px solid #2a2a1a;
+            border-top: 2px solid var(--primary);
+            border-radius: 14px 14px 0 0;
+            padding: 0;
+            width: 100%; max-width: 520px;
+            max-height: 92vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .det-header {
+            position: sticky; top: 0;
+            background: #0a0a05;
+            border-bottom: 1px solid #1a1a0a;
+            padding: 16px 18px 12px;
+            z-index: 2;
+        }
+        .det-handle {
+            width: 36px; height: 4px;
+            background: #2a2a1a; border-radius: 2px;
+            margin: 0 auto 14px;
+        }
+        .det-nome {
+            font-family: 'Cinzel', serif;
+            color: var(--primary); font-size: 1rem;
+            letter-spacing: 2px; margin: 0 0 2px 0;
+        }
+        .det-sub { font-size: 0.6rem; color: #555; }
+        .det-body { padding: 16px 18px 32px; }
+        .det-section {
+            border: 1px solid #1a1a1a;
+            border-radius: 6px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+        .det-section-title {
+            background: #0f0f0a;
+            padding: 8px 12px;
+            font-size: 0.6rem;
+            color: #666;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .det-section-body { padding: 12px; }
+        .det-row {
+            display: flex; align-items: center;
+            gap: 8px; margin-bottom: 8px;
+        }
+        .det-row:last-child { margin-bottom: 0; }
+        .det-label { font-size: 0.58rem; color: #444; min-width: 60px; }
+        .det-val {
+            flex: 1; font-size: 0.7rem; color: var(--primary);
+            word-break: break-all; line-height: 1.4;
+        }
+        .det-copy-btn {
+            padding: 5px 8px !important; min-height: 32px !important;
+            font-size: 0.6rem !important; width: auto !important;
+            flex-shrink: 0; border-color: #2a2a1a !important;
+            color: #888 !important;
+        }
+        .det-copy-btn:active { background: #1a1a0a !important; }
+        .det-input {
+            width: 100%; padding: 11px 12px;
+            background: #000; border: 1px solid #222;
+            color: var(--primary); font-family: 'Fira Code', monospace;
+            font-size: 0.9rem; border-radius: 3px;
+            margin-bottom: 8px; -webkit-appearance: none;
+            outline: none;
+        }
+        .det-input:focus { border-color: var(--primary); }
+        .det-select {
+            width: 100%; padding: 11px 32px 11px 12px;
+            background: #000; border: 1px solid #222;
+            color: var(--primary); font-family: 'Fira Code', monospace;
+            font-size: 0.9rem; border-radius: 3px;
+            margin-bottom: 8px; -webkit-appearance: none;
+            outline: none; cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23c5a059'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+        .det-btn {
+            width: 100%; padding: 12px;
+            min-height: 46px; font-size: 0.72rem;
+            border-radius: 3px; font-weight: 700;
+            cursor: pointer; font-family: 'Fira Code', monospace;
+            text-transform: uppercase; transition: all 0.2s;
+            -webkit-appearance: none;
+        }
+        .det-btn-primary {
+            background: var(--primary); color: #000;
+            border: 1px solid var(--primary);
+        }
+        .det-btn-outline {
+            background: transparent; color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        .det-btn-danger {
+            background: transparent; color: #ff6666;
+            border: 1px solid #5a1a1a;
+        }
+        .det-btn:active { opacity: 0.8; transform: scale(0.98); }
+        .det-token-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 10px; border-radius: 20px;
+            font-size: 0.6rem; font-weight: 700;
+        }
+        .det-status-ativo   { color:#22c55e; border:1px solid #22c55e; background:rgba(34,197,94,.07); }
+        .det-status-expira  { color:#f59e0b; border:1px solid #f59e0b; background:rgba(245,158,11,.07); }
+        .det-status-expirado{ color:#ff4444; border:1px solid #ff4444; background:rgba(255,68,68,.07); }
+        .det-status-sem     { color:#444;    border:1px solid #333;    background:transparent; }
+        .det-feedback {
+            display: none; padding: 8px 10px;
+            font-size: 0.65rem; border-radius: 4px;
+            margin-top: 8px; text-align: center;
+        }
+        .det-feedback.ok  { color:#22c55e; background:rgba(34,197,94,.08); border:1px solid #1a4a1a; }
+        .det-feedback.err { color:#ff4444; background:rgba(255,68,68,.08); border:1px solid #4a1a1a; }
+    </style>
+</head>
+<body>
+
+<div id="login-screen">
+    <h2 style="margin-bottom: 20px;">ACESSO RESTRITO</h2>
+    <input type="password" id="pass-input" placeholder="DIGITE A SENHA" onkeydown="checkEnter(event)">
+    <br>
+    <button onclick="verificarSenha()" style="width: auto; padding: 10px 30px;">ENTRAR</button>
+</div>
+
+<div class="terminal" id="main-terminal">
+    <div class="terminal-header">
+        <span>EN_SYSTEM_OS [v4.0.2]</span>
+        <span id="tab-indicator">// GEN_MODE</span>
+    </div>
+
+    <!-- Tab buttons -->
+    <div class="tabs-wrap">
+        <button id="btn-tab-gen" onclick="switchTab('gen')" style="flex:1; background: var(--primary); color:#000; border-color: var(--primary);">[ GERAR_CHAVE ]</button>
+        <button id="btn-tab-cfg" onclick="switchTab('cfg')" style="flex:1;">[ CLIENTES ]</button>
+    </div>
+
+    <!-- Seção: Gerar Código -->
+    <div id="section-gen">
+        <h2>MASTER_GEN</h2>
+        <div class="status">> INICIALIZANDO PROTOCOLO_KEY...</div>
+        <button onclick="gerarCodigo()">[ GERAR_CHAVE_UNICA ]</button>
+        <div id="output-zone" class="output-zone">
+            <div id="resultado" class="code-box" onclick="copiarCodigo()"></div>
+            <div class="log" id="log-text">
+                > CONEXÃO ESTABELECIDA COM FIREBASE...<br>
+                > STATUS: AGUARDANDO ATIVAÇÃO NO PAINEL CLIENTE...<br>
+                > SEGURANÇA: APENAS CÓDIGOS DESTA SESSÃO SÃO VÁLIDOS.
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção: Clientes -->
+    <div id="section-cfg" style="display:none;">
+        <h2 style="font-size:1rem; margin-bottom:4px;">CLIENTES_SYS</h2>
+        <div class="status">> GERENCIAR BARBEARIAS CADASTRADAS...</div>
+
+        <!-- Cadastrar novo cliente -->
+        <div style="margin-bottom:16px; padding:12px; border:1px solid #1a1a1a; border-radius:4px;">
+            <div class="log" style="margin-top:0; margin-bottom:10px; color:#666;">> NOVO_CLIENTE:</div>
+            <input type="text" id="cli-nome" placeholder="NOME DA BARBEARIA"
+                style="width:100%; padding:10px; font-size:0.8rem; margin-bottom:8px; color:var(--primary); text-transform:uppercase;">
+            <input type="text" id="cli-dono" placeholder="NOME DO DONO"
+                style="width:100%; padding:10px; font-size:0.8rem; margin-bottom:8px; color:var(--primary);">
+            <input type="text" id="cli-whats" placeholder="WHATSAPP (ex: 5511999999999)"
+                style="width:100%; padding:10px; font-size:0.8rem; margin-bottom:8px; color:var(--primary);">
+            <button onclick="cadastrarCliente()" style="padding:10px; font-size:0.75rem;">[ CADASTRAR + GERAR LINKS ]</button>
+        </div>
+
+        <!-- Links gerados -->
+        <div id="links-gerados" style="display:none; margin-bottom:16px; padding:12px; border:1px solid #1a2a1a; border-radius:4px; background:#050f05;">
+            <div class="log" style="margin-top:0; margin-bottom:10px; color:#4a7a4a;">> LINKS_GERADOS ✓</div>
+            <div style="margin-bottom:8px;">
+                <div class="log" style="margin-top:0; margin-bottom:4px; color:#555;">> AGENDAMENTO (cliente):</div>
+                <div id="link-index" class="code-box" onclick="copiarLink('link-index')" style="font-size:0.65rem; word-break:break-all; padding:12px;"></div>
+            </div>
+            <div style="margin-top:16px;">
+                <div class="log" style="margin-top:0; margin-bottom:4px; color:#555;">> PAINEL ADMIN (barbearia):</div>
+                <div id="link-admin" class="code-box" onclick="copiarLink('link-admin')" style="font-size:0.65rem; word-break:break-all; padding:12px;"></div>
+            </div>
+            <div class="log" style="margin-top:16px; color:#2a5a2a; line-height:1.6;">
+                > ID: <span id="link-id" style="color:var(--primary)"></span><br>
+                > STATUS: ATIVO ✓<br>
+                > CLIQUE NOS LINKS PARA COPIAR
+            </div>
+        </div>
+
+        <!-- Lista de clientes -->
+        <div>
+            <div class="log" style="margin-top:0; margin-bottom:8px; color:#555;">> CLIENTES_CADASTRADOS:</div>
+            <div id="lista-clientes" style="max-height:300px; overflow-y:auto;">
+                <div style="color:#333; font-size:0.65rem;">carregando...</div>
+            </div>
+        </div>
+
+        <!-- CONFIG PIX -->
+        <div style="margin-top:20px; padding-top:16px; border-top:1px solid #1a1a1a;">
+            <div class="log" style="margin-top:0; margin-bottom:8px; color:#555;">> CHAVE_PIX_GLOBAL:</div>
+            <div id="pix-atual" style="padding:10px; background:#000; border:1px solid #222; color:var(--primary); font-size:0.8rem; word-break:break-all; min-height:36px; margin-bottom:8px;">
+                <span style="color:#333;">carregando...</span>
+            </div>
+            <input type="text" id="pix-input" placeholder="email, telefone ou CPF..."
+                style="width:100%; padding:10px; font-size:0.8rem; margin-bottom:8px; color:var(--primary);">
+            <button onclick="salvarPix()" style="padding:10px; font-size:0.75rem;">[ SALVAR_CHAVE_PIX ]</button>
+            <div id="pix-feedback" style="display:none; margin-top:10px;" class="log">> STATUS: CHAVE_PIX ATUALIZADA. ✓</div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: DETALHES DO CLIENTE -->
+<div class="modal-detalhes" id="modal-detalhes">
+  <div class="det-box">
+    <div class="det-header">
+      <div class="det-handle"></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div class="det-nome" id="det-nome">—</div>
+          <div class="det-sub" id="det-sub">—</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span id="det-status-badge" class="det-token-badge"></span>
+          <button onclick="fecharDetalhes()" style="width:auto;min-height:32px;padding:4px 10px;font-size:0.65rem;border-color:#333;color:#666;">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="det-body">
+
+      <!-- LINKS -->
+      <div class="det-section">
+        <div class="det-section-title">> LINKS DE ACESSO</div>
+        <div class="det-section-body">
+          <div class="det-row">
+            <div class="det-label">📱 Cliente</div>
+            <div class="det-val" id="det-link-index" style="font-size:0.6rem;"></div>
+            <button class="det-copy-btn" onclick="copiarDet('det-link-index')">📋</button>
+          </div>
+          <div class="det-row">
+            <div class="det-label">⚙️ Admin</div>
+            <div class="det-val" id="det-link-admin" style="font-size:0.6rem;"></div>
+            <button class="det-copy-btn" onclick="copiarDet('det-link-admin')">📋</button>
+          </div>
+          <div class="det-row">
+            <div class="det-label">🆔 ID</div>
+            <div class="det-val" id="det-id" style="font-size:0.58rem;color:#555;"></div>
+            <button class="det-copy-btn" onclick="copiarDet('det-id')">📋</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOKEN -->
+      <div class="det-section">
+        <div class="det-section-title">> TOKEN DE ACESSO MENSAL</div>
+        <div class="det-section-body">
+          <div id="det-token-info" style="margin-bottom:10px;"></div>
+          <div class="det-row" id="det-token-row" style="display:none;">
+            <div class="det-label">Token</div>
+            <div class="det-val" id="det-token-val" style="letter-spacing:2px;"></div>
+            <button class="det-copy-btn" onclick="copiarDet('det-token-val')">📋</button>
+          </div>
+          <label style="display:block;font-size:0.58rem;color:#555;margin-bottom:5px;">> PLANO</label>
+          <select class="det-select" id="det-plano" onchange="detToggleCustom()">
+            <option value="30">30 dias — Mensal</option>
+            <option value="90">90 dias — Trimestral</option>
+            <option value="365">365 dias — Anual</option>
+            <option value="custom">Personalizado</option>
+          </select>
+          <div id="det-custom-wrap" style="display:none;">
+            <input type="number" class="det-input" id="det-dias-custom" placeholder="Número de dias (ex: 60)" min="1">
+          </div>
+          <label style="display:block;font-size:0.58rem;color:#555;margin-bottom:5px;">> TOKEN (deixe vazio para gerar novo automaticamente)</label>
+          <input type="text" class="det-input" id="det-token-input"
+            placeholder="XXXX-XXXX-XXXX-XXXX"
+            oninput="this.value=this.value.toUpperCase()" style="letter-spacing:2px;">
+          <button class="det-btn det-btn-primary" onclick="detConfirmarToken()">🔑 CONFIRMAR TOKEN</button>
+          <div id="det-token-gerado" style="display:none;margin-top:10px;padding:12px;background:#000;border:1px solid #1a3a1a;border-radius:4px;text-align:center;">
+            <div style="font-size:0.55rem;color:#2a6a2a;margin-bottom:6px;">> TOKEN SALVO ✓ — toque para copiar</div>
+            <div id="det-token-gerado-val" onclick="copiarDetTxt(this)" style="color:var(--primary);font-size:0.95rem;font-weight:700;letter-spacing:3px;cursor:pointer;padding:6px;"></div>
+            <div id="det-token-gerado-exp" style="font-size:0.55rem;color:#444;margin-top:4px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHAVE PIX DO CLIENTE -->
+      <div class="det-section">
+        <div class="det-section-title">> CHAVE PIX DO CLIENTE</div>
+        <div class="det-section-body">
+          <div id="det-pix-atual" style="padding:10px;background:#000;border:1px solid #1a1a1a;border-radius:3px;font-size:0.75rem;color:var(--primary);word-break:break-all;margin-bottom:8px;min-height:36px;"></div>
+          <input type="text" class="det-input" id="det-pix-input" placeholder="email, telefone, CPF ou chave aleatória">
+          <button class="det-btn det-btn-outline" onclick="detSalvarPix()">💳 SALVAR CHAVE PIX</button>
+          <div class="det-feedback" id="det-pix-feedback"></div>
+        </div>
+      </div>
+
+      <!-- DADOS DO CLIENTE -->
+      <div class="det-section">
+        <div class="det-section-title">> DADOS DO CLIENTE</div>
+        <div class="det-section-body">
+          <label style="display:block;font-size:0.58rem;color:#555;margin-bottom:5px;">> NOME DA BARBEARIA</label>
+          <input type="text" class="det-input" id="det-edit-nome" oninput="this.value=this.value.toUpperCase()">
+          <label style="display:block;font-size:0.58rem;color:#555;margin-bottom:5px;">> NOME DO DONO</label>
+          <input type="text" class="det-input" id="det-edit-dono">
+          <label style="display:block;font-size:0.58rem;color:#555;margin-bottom:5px;">> WHATSAPP</label>
+          <input type="text" class="det-input" id="det-edit-whats" placeholder="5511999999999">
+          <button class="det-btn det-btn-outline" onclick="detSalvarDados()" style="margin-bottom:8px;">💾 SALVAR DADOS</button>
+          <div class="det-feedback" id="det-dados-feedback"></div>
+        </div>
+      </div>
+
+      <!-- AÇÕES -->
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="det-btn" id="det-btn-toggle" onclick="detToggleAtivo()" style="flex:1;font-size:0.68rem;">🔒 BLOQUEAR</button>
+        <button class="det-btn det-btn-danger" onclick="detExcluir()" style="flex:1;font-size:0.68rem;">🗑 EXCLUIR</button>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 <!-- MODAL: GERAR/RENOVAR TOKEN -->
@@ -662,6 +1707,216 @@
             setTimeout(() => el.style.color = 'var(--primary)', 800);
         });
     }
+
+    // ===== MODAL DETALHES =====
+    let _detId = null;
+
+    async function abrirDetalhes(id) {
+        _detId = id;
+        const snap = await db.collection('clientes').doc(id).get();
+        if (!snap.exists) return;
+        const c = snap.data();
+        const agora = Date.now();
+
+        // Header
+        document.getElementById('det-nome').textContent = c.nome || '—';
+        document.getElementById('det-sub').textContent  = (c.dono||'') + (c.whatsapp ? ' · ' + c.whatsapp : '');
+
+        // Status badge (ativo/inativo)
+        const badge = document.getElementById('det-status-badge');
+        if (c.ativo) { badge.textContent='● ATIVO'; badge.className='det-token-badge det-status-ativo'; }
+        else         { badge.textContent='● INATIVO'; badge.className='det-token-badge det-status-expirado'; }
+
+        // Botão toggle
+        document.getElementById('det-btn-toggle').textContent = c.ativo ? '🔒 BLOQUEAR' : '✅ ATIVAR';
+        document.getElementById('det-btn-toggle').style.borderColor = c.ativo ? '#5a1a1a' : '#1a5a1a';
+        document.getElementById('det-btn-toggle').style.color = c.ativo ? '#ff6666' : '#66ff88';
+
+        // Links
+        document.getElementById('det-link-index').textContent = c.linkIndex || '—';
+        document.getElementById('det-link-admin').textContent = c.linkAdmin || '—';
+        document.getElementById('det-id').textContent = id;
+
+        // Token
+        const tokenRow = document.getElementById('det-token-row');
+        const tokenInfo = document.getElementById('det-token-info');
+        if (c.token) {
+            const exp = c.tokenExpira || 0;
+            const dias = Math.ceil((exp - agora) / 86400000);
+            tokenRow.style.display = 'flex';
+            document.getElementById('det-token-val').textContent = c.token;
+            if (exp < agora) {
+                tokenInfo.innerHTML = `<span class="det-token-badge det-status-expirado">EXPIRADO em ${new Date(exp).toLocaleDateString('pt-BR')}</span>`;
+            } else if (dias <= 7) {
+                tokenInfo.innerHTML = `<span class="det-token-badge det-status-expira">VENCE EM ${dias} dias · ${new Date(exp).toLocaleDateString('pt-BR')}</span>`;
+            } else {
+                tokenInfo.innerHTML = `<span class="det-token-badge det-status-ativo">✓ ATIVO · ${dias} dias restantes · expira ${new Date(exp).toLocaleDateString('pt-BR')}</span>`;
+            }
+        } else {
+            tokenRow.style.display = 'none';
+            tokenInfo.innerHTML = `<span class="det-token-badge det-status-sem">Nenhum token gerado ainda</span>`;
+        }
+        document.getElementById('det-plano').value = '30';
+        document.getElementById('det-token-input').value = c.token || '';
+        document.getElementById('det-custom-wrap').style.display = 'none';
+        document.getElementById('det-token-gerado').style.display = 'none';
+
+        // PIX do cliente (da subcoleção)
+        try {
+            const pixDoc = await db.collection('clientes').doc(id).collection('configuracao').doc('config').get();
+            const pixKey = pixDoc.exists && pixDoc.data().pixKey ? pixDoc.data().pixKey : '';
+            document.getElementById('det-pix-atual').textContent = pixKey || '—';
+            document.getElementById('det-pix-input').value = pixKey;
+        } catch(e) {
+            document.getElementById('det-pix-atual').textContent = '—';
+        }
+
+        // Dados editáveis
+        document.getElementById('det-edit-nome').value  = c.nome  || '';
+        document.getElementById('det-edit-dono').value  = c.dono  || '';
+        document.getElementById('det-edit-whats').value = c.whatsapp || '';
+
+        // Feedbacks
+        ['det-pix-feedback','det-dados-feedback'].forEach(id => {
+            document.getElementById(id).style.display = 'none';
+        });
+
+        document.getElementById('modal-detalhes').classList.add('open');
+    }
+
+    function fecharDetalhes() {
+        document.getElementById('modal-detalhes').classList.remove('open');
+        _detId = null;
+        loadClientes();
+    }
+
+    // Copiar valor de elemento
+    function copiarDet(elId) {
+        const txt = document.getElementById(elId).textContent;
+        if (!txt || txt === '—') return;
+        navigator.clipboard.writeText(txt).then(() => {
+            const el = document.getElementById(elId);
+            const orig = el.style.color;
+            el.style.color = '#00ff88';
+            setTimeout(() => el.style.color = orig, 700);
+        });
+    }
+    function copiarDetTxt(el) {
+        navigator.clipboard.writeText(el.textContent).then(() => {
+            const orig = el.style.color;
+            el.style.color = '#00ff88';
+            setTimeout(() => el.style.color = orig, 700);
+        });
+    }
+
+    function detToggleCustom() {
+        document.getElementById('det-custom-wrap').style.display =
+            document.getElementById('det-plano').value === 'custom' ? 'block' : 'none';
+    }
+
+    async function detConfirmarToken() {
+        if (!_detId) return;
+        const plano = document.getElementById('det-plano').value;
+        let dias = parseInt(plano);
+        if (plano === 'custom') {
+            dias = parseInt(document.getElementById('det-dias-custom').value);
+            if (!dias || dias < 1) { alert('Informe os dias!'); return; }
+        }
+        const tokenManual = document.getElementById('det-token-input').value.trim().toUpperCase();
+        const token = tokenManual || gerarTokenAleatorio();
+        const expira = Date.now() + dias * 86400000;
+        try {
+            await db.collection('clientes').doc(_detId).update({
+                token, tokenExpira: expira, tokenDias: dias, tokenAtualizadoEm: new Date()
+            });
+            document.getElementById('det-token-val').textContent = token;
+            document.getElementById('det-token-row').style.display = 'flex';
+            document.getElementById('det-token-gerado-val').textContent = token;
+            document.getElementById('det-token-gerado-exp').textContent =
+                `> Válido por ${dias} dias · Expira em ${new Date(expira).toLocaleDateString('pt-BR')}`;
+            document.getElementById('det-token-gerado').style.display = 'block';
+            // Atualiza badge
+            const info = document.getElementById('det-token-info');
+            info.innerHTML = `<span class="det-token-badge det-status-ativo">✓ ATIVO · ${dias} dias · expira ${new Date(expira).toLocaleDateString('pt-BR')}</span>`;
+            navigator.clipboard.writeText(token).catch(()=>{});
+        } catch(e) { alert('ERRO: ' + e.message); }
+    }
+
+    async function detSalvarPix() {
+        if (!_detId) return;
+        const val = document.getElementById('det-pix-input').value.trim();
+        if (!val) { alert('Digite a chave PIX!'); return; }
+        const fb = document.getElementById('det-pix-feedback');
+        try {
+            await db.collection('clientes').doc(_detId).collection('configuracao').doc('config')
+                .set({ pixKey: val }, { merge: true });
+            document.getElementById('det-pix-atual').textContent = val;
+            fb.textContent = '✓ Chave PIX salva!';
+            fb.className = 'det-feedback ok';
+            fb.style.display = 'block';
+            setTimeout(() => fb.style.display = 'none', 3000);
+        } catch(e) {
+            fb.textContent = 'Erro: ' + e.message;
+            fb.className = 'det-feedback err';
+            fb.style.display = 'block';
+        }
+    }
+
+    async function detSalvarDados() {
+        if (!_detId) return;
+        const nome  = document.getElementById('det-edit-nome').value.trim().toUpperCase();
+        const dono  = document.getElementById('det-edit-dono').value.trim();
+        const whats = document.getElementById('det-edit-whats').value.trim();
+        if (!nome) { alert('Nome é obrigatório!'); return; }
+        const fb = document.getElementById('det-dados-feedback');
+        try {
+            await db.collection('clientes').doc(_detId).update({ nome, dono, whatsapp: whats });
+            document.getElementById('det-nome').textContent = nome;
+            document.getElementById('det-sub').textContent = dono + (whats ? ' · ' + whats : '');
+            fb.textContent = '✓ Dados salvos!';
+            fb.className = 'det-feedback ok';
+            fb.style.display = 'block';
+            setTimeout(() => fb.style.display = 'none', 3000);
+        } catch(e) {
+            fb.textContent = 'Erro: ' + e.message;
+            fb.className = 'det-feedback err';
+            fb.style.display = 'block';
+        }
+    }
+
+    async function detToggleAtivo() {
+        if (!_detId) return;
+        const snap = await db.collection('clientes').doc(_detId).get();
+        const novoStatus = !snap.data().ativo;
+        await db.collection('clientes').doc(_detId).update({ ativo: novoStatus });
+        // Atualizar UI
+        const badge = document.getElementById('det-status-badge');
+        const btn   = document.getElementById('det-btn-toggle');
+        if (novoStatus) {
+            badge.textContent='● ATIVO'; badge.className='det-token-badge det-status-ativo';
+            btn.textContent='🔒 BLOQUEAR'; btn.style.borderColor='#5a1a1a'; btn.style.color='#ff6666';
+        } else {
+            badge.textContent='● INATIVO'; badge.className='det-token-badge det-status-expirado';
+            btn.textContent='✅ ATIVAR'; btn.style.borderColor='#1a5a1a'; btn.style.color='#66ff88';
+        }
+    }
+
+    async function detExcluir() {
+        if (!_detId) return;
+        const nome = document.getElementById('det-nome').textContent;
+        if (!confirm(`Excluir permanentemente "${nome}"?
+
+Esta ação não pode ser desfeita.`)) return;
+        try {
+            await db.collection('clientes').doc(_detId).delete();
+            fecharDetalhes();
+        } catch(e) { alert('ERRO: ' + e.message); }
+    }
+
+    // Fechar modal ao clicar fora
+    document.getElementById('modal-detalhes').addEventListener('click', function(e) {
+        if (e.target === this) fecharDetalhes();
+    });
 
         // ===== CHAVE PIX =====
     async function loadPix() {

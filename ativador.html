@@ -395,6 +395,23 @@
 </head>
 <body>
 
+<script>
+    // Funções de login inline — precisam estar disponíveis imediatamente
+    function verificarSenha() {
+        const senha = document.getElementById('pass-input').value;
+        if (senha === 'coelhus') {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-terminal').style.display = 'block';
+        } else {
+            alert("SENHA INCORRETA. ACESSO NEGADO.");
+            document.getElementById('pass-input').value = "";
+        }
+    }
+    function checkEnter(event) {
+        if (event.key === "Enter") verificarSenha();
+    }
+</script>
+
 <div id="login-screen">
     <h2 style="margin-bottom: 20px;">ACESSO RESTRITO</h2>
     <input type="password" id="pass-input" placeholder="DIGITE A SENHA" onkeydown="checkEnter(event)">

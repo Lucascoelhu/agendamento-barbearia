@@ -3,324 +3,514 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>💈 Admin | Nome da Barbearia</title>
+    <title>💈 Admin | El Negrone's</title>
    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
         <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
         <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Cinzel:wght@600;700;900&display=swap" rel="stylesheet">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Cinzel:wght@600;700;900&display=swap');
+
         :root { 
-            --primary: #c5a059; --bg: #0a0a0a; --card: #141414; --input-bg: #1d1d1d;  
-            --text: #ffffff; --text-dim: #999; --danger: #ff4d4d; --success: #00ff88;
-            --grad: linear-gradient(135deg, #c5a059 0%, #a68549 100%); 
+            --primary: #c5a059;
+            --primary-dim: rgba(197,160,89,0.12);
+            --primary-glow: rgba(197,160,89,0.25);
+            --bg: #080808;
+            --bg2: #0e0e0e;
+            --card: #111111;
+            --card2: #161616;
+            --border: rgba(255,255,255,0.06);
+            --border-gold: rgba(197,160,89,0.25);
+            --input-bg: #0e0e0e;
+            --text: #f0f0f0;
+            --text-dim: #666;
+            --text-mid: #999;
+            --danger: #e05252;
+            --success: #4caf7d;
+            --grad: linear-gradient(135deg, #d4af6a 0%, #b8923e 100%);
+            --grad-subtle: linear-gradient(135deg, rgba(197,160,89,0.15) 0%, rgba(184,146,62,0.05) 100%);
+            --shadow: 0 8px 32px rgba(0,0,0,0.6);
+            --shadow-gold: 0 4px 20px rgba(197,160,89,0.15);
+            --radius: 20px;
+            --radius-sm: 12px;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; }
-        .tab-btn.disabled {
-    opacity: 0.3;
-    filter: grayscale(1);
-    cursor: not-allowed;
-}
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; margin: 0; padding: 0; }
+
+        body { 
+            font-family: 'DM Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            padding-bottom: 120px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ─── Noise texture overlay ─── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        /* ─── Top Nav ─── */
         .top-nav-container { 
             position: sticky; 
             top: 0; 
-            padding: 10px 5px; 
-            background: rgba(10, 10, 10, 0.95); 
-            backdrop-filter: blur(15px); 
-            border-bottom: 1px solid rgba(197, 160, 89, 0.2);
-            z-index: 1000; 
+            padding: 12px 16px 10px;
+            background: rgba(8,8,8,0.92); 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
         }
+
+        /* Linha dourada sutil no topo da nav */
+        .top-nav-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0.5;
+        }
+
         .tab-bar { 
-            background: #161616; 
-            padding: 8px; 
-            border-radius: 18px; 
-            display: flex; 
-            max-width: 650px; 
+            display: flex;
+            gap: 4px;
+            max-width: 600px; 
             margin: 0 auto; 
-            border: 1px solid #333; 
             overflow-x: auto;
             scrollbar-width: none;
+            padding: 2px;
         }
         .tab-bar::-webkit-scrollbar { display: none; }
+
         .tab-btn { 
-            padding: 12px 10px; 
-            border-radius: 14px; 
-            color: #777; 
-            font-size: 0.75rem; /* Fonte maior */
-            font-weight: 800; 
+            flex: 1;
+            min-width: 72px;
+            padding: 10px 6px 8px;
+            border-radius: var(--radius-sm);
+            color: var(--text-dim); 
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
             cursor: pointer; 
-            flex: 1; 
-            min-width: 90px; /* Botões mais largos */
             text-align: center; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            gap: 5px; 
-            transition: 0.3s;
+            gap: 4px; 
+            transition: all 0.25s ease;
+            font-family: 'DM Sans', sans-serif;
+            text-transform: uppercase;
         }
-        .tab-btn span:first-child { 
-            font-size: 1.6rem; /* Ícones bem visíveis */
-        }
-        
-        /* Estilo para horários já agendados (não clicáveis) */
-#grid-selecao-folgas .hora-chip.agendado {
-    background: #2d1f1f !important;
-    border-color: #ff4444 !important;
-    color: #ff6666 !important;
-    cursor: not-allowed !important;
-    position: relative;
-}
+        .tab-btn span:first-child { font-size: 1.3rem; }
 
-#grid-selecao-folgas .hora-chip.agendado::after {
-    content: '✕';
-    position: absolute;
-    top: 2px;
-    right: 4px;
-    font-size: 0.5rem;
-    opacity: 0.7;
-}
-
-/* Estilo para horários já bloqueados como folga */
-#grid-selecao-folgas .hora-chip.bloqueado {
-    background: #1f2d1f !important;
-    border-color: #00ff88 !important;
-    color: #66ffaa !important;
-    cursor: not-allowed !important;
-}
-
-/* Tooltip personalizado */
-#grid-selecao-folgas .hora-chip[title]:hover::before {
-    content: attr(title);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #000;
-    color: #fff;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.6rem;
-    white-space: nowrap;
-    z-index: 100;
-    pointer-events: none;
-}
+        .tab-btn:hover { color: var(--text-mid); background: rgba(255,255,255,0.03); }
 
         .tab-btn.active { 
+            color: var(--primary);
+            background: var(--primary-dim);
+        }
+        .tab-btn.active span:first-child {
+            filter: drop-shadow(0 0 6px rgba(197,160,89,0.5));
+        }
+
+        .tab-btn.disabled { opacity: 0.2; filter: grayscale(1); cursor: not-allowed; }
+
+        /* ─── Content ─── */
+        .content { 
+            padding: 20px 16px; 
+            max-width: 480px; 
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ─── Section label ─── */
+        label { 
+            font-size: 0.58rem; 
             color: var(--primary); 
-            background: rgba(197, 160, 89, 0.1);
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            margin: 0 0 8px 4px; 
+            display: block;
+            opacity: 0.85;
         }
-        .content { padding: 20px 15px; max-width: 480px; margin: auto; }
-        .card { background: var(--card); border-radius: 30px; padding: 22px; margin-bottom: 18px; border: 1px solid #222; position: relative; overflow: hidden; }
-        
-        h3 { font-family: 'Cinzel', serif; color: var(--primary); font-size: 0.9rem; margin-bottom: 15px; text-transform: uppercase; }
-        label { font-size: 0.6rem; color: var(--primary); font-weight: 800; text-transform: uppercase; margin: 0 0 8px 10px; display: block; }
-        input, select, textarea { width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 15px; border: 1px solid #282828; background: var(--input-bg); color: #fff; font-size: 0.85rem; }
-        
-        .btn-action { width: 100%; padding: 18px; border-radius: 18px; background: var(--grad); color: #000; font-weight: 900; border: none; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; margin-top: 10px; }
-        .btn-outline { width: 100%; padding: 15px; background: transparent; border: 1px solid #333; color: var(--text-dim); border-radius: 15px; font-weight: 700; font-size: 0.7rem; cursor: pointer; margin-top: 5px; }
 
-        .agenda-card { background: #1a1a1a; border-radius: 25px; padding: 20px; margin-bottom: 20px; border: 1px solid #282828; }
-        .badge-hora { background: var(--grad); color: #000; padding: 6px 15px; border-radius: 12px; font-weight: 900; font-size: 1rem; }
-        
-        .dias-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
+        /* ─── Card ─── */
+        .card { 
+            background: var(--card); 
+            border-radius: var(--radius); 
+            padding: 20px; 
+            margin-bottom: 14px; 
+            border: 1px solid var(--border); 
+            position: relative; 
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+        }
+
+        /* ─── Headings ─── */
+        h3 { 
+            font-family: 'Cinzel', serif; 
+            color: var(--primary); 
+            font-size: 0.8rem; 
+            font-weight: 700;
+            margin-bottom: 16px; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+        }
+
+        /* ─── Inputs ─── */
+        input, select, textarea { 
+            width: 100%; 
+            padding: 14px 16px; 
+            margin-bottom: 12px; 
+            border-radius: var(--radius-sm); 
+            border: 1px solid var(--border); 
+            background: var(--input-bg); 
+            color: var(--text); 
+            font-size: 0.85rem;
+            font-family: 'DM Sans', sans-serif;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--border-gold);
+        }
+        select option { background: #111; }
+
+        /* ─── Buttons ─── */
+        .btn-action { 
+            width: 100%; 
+            padding: 16px; 
+            border-radius: var(--radius-sm); 
+            background: var(--grad); 
+            color: #000; 
+            font-weight: 800; 
+            border: none; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            font-family: 'DM Sans', sans-serif;
+            margin-top: 8px;
+            transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px rgba(197,160,89,0.2);
+        }
+        .btn-action:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: var(--shadow-gold); }
+        .btn-action:active { transform: translateY(0); }
+
+        .btn-outline { 
+            width: 100%; 
+            padding: 13px; 
+            background: transparent; 
+            border: 1px solid var(--border); 
+            color: var(--text-mid); 
+            border-radius: var(--radius-sm); 
+            font-weight: 600; 
+            font-size: 0.7rem;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer; 
+            margin-top: 6px;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .btn-outline:hover { border-color: var(--border-gold); color: var(--primary); }
+
+        /* ─── Agenda card ─── */
+        .agenda-card { 
+            background: var(--card2); 
+            border-radius: var(--radius); 
+            padding: 18px; 
+            margin-bottom: 14px; 
+            border: 1px solid var(--border);
+            transition: border-color 0.2s;
+        }
+        .badge-hora { 
+            background: var(--card); 
+            color: var(--primary); 
+            padding: 5px 12px; 
+            border-radius: 8px; 
+            font-weight: 800; 
+            font-size: 0.95rem;
+            border: 1px solid var(--border-gold);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ─── Dias grid / chips ─── */
+        .dias-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
         .dia-chip { 
-            background: #161616; padding: 18px 10px; border-radius: 18px; font-size: 0.75rem; 
-            text-align: center; border: 1px solid #252525; cursor: pointer; font-weight: 800; 
-            text-transform: uppercase; transition: 0.3s; color: var(--text-dim);
-        }
-        .dia-chip.active { background: var(--grad); color: #000; border: none; transform: scale(1.02); }
-
-        /* NOVOS ESTILOS PARA O FILTRO DE DATAS NA AGENDA */
-        .datas-filtro-wrapper { display: flex; gap: 10px; overflow-x: auto; padding: 5px 0 20px 0; scrollbar-width: none; }
-        .datas-filtro-wrapper::-webkit-scrollbar { display: none; }
-        .card-data-filtro { 
-            min-width: 65px; background: #161616; padding: 12px 5px; border-radius: 15px; 
-            text-align: center; border: 1px solid #222; cursor: pointer; transition: 0.3s;
-        }
-        .card-data-filtro.active { background: var(--grad); border-color: var(--primary); color: #000; }
-        .card-data-filtro span { display: block; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
-        .card-data-filtro b { font-size: 1rem; display: block; }
-
-        .grid-10min { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-        .hora-chip { 
-            background: #1a1a1a; 
-            padding: 15px 2px; 
-            border-radius: 12px; 
+            background: var(--card2); 
+            padding: 14px 10px; 
+            border-radius: var(--radius-sm); 
             font-size: 0.7rem; 
             text-align: center; 
-            border: 1px solid #252525; 
-            cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-            
-            /* Importante para não bugar o arraste */
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none; /* Controlado manualmente pelo JS acima */
+            border: 1px solid var(--border); 
+            cursor: pointer; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            transition: all 0.2s; 
+            color: var(--text-mid);
+            letter-spacing: 0.3px;
+        }
+        .dia-chip:hover { border-color: var(--border-gold); color: var(--primary); }
+        .dia-chip.active { 
+            background: var(--grad); 
+            color: #000; 
+            border-color: transparent; 
+            box-shadow: 0 2px 10px rgba(197,160,89,0.25);
         }
 
-        .hora-chip { 
-            background: #1a1a1a; 
-            padding: 16px 2px; /* Chip mais alto para facilitar toque */
-            border-radius: 12px; 
-            font-size: 0.75rem; 
-            text-align: center; 
-            border: 1px solid #252525; 
-            user-select: none;
-            touch-action: pan-y; /* Permite rolagem vertical nativa */
+        /* ─── Date filter ─── */
+        .datas-filtro-wrapper { 
+            display: flex; 
+            gap: 8px; 
+            overflow-x: auto; 
+            padding: 4px 0 18px; 
+            scrollbar-width: none; 
         }
+        .datas-filtro-wrapper::-webkit-scrollbar { display: none; }
+        .card-data-filtro { 
+            min-width: 58px; 
+            background: var(--card2); 
+            padding: 10px 4px; 
+            border-radius: var(--radius-sm); 
+            text-align: center; 
+            border: 1px solid var(--border); 
+            cursor: pointer; 
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .card-data-filtro:hover { border-color: var(--border-gold); }
+        .card-data-filtro.active { background: var(--grad); border-color: transparent; color: #000; box-shadow: 0 2px 10px rgba(197,160,89,0.25); }
+        .card-data-filtro span { display: block; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; opacity: 0.7; }
+        .card-data-filtro b { font-size: 1.05rem; display: block; font-weight: 800; }
+        .card-data-filtro.active span, .card-data-filtro.active b { opacity: 1; }
+
+        /* ─── Hora chips ─── */
+        .grid-10min { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+
+        .hora-chip { 
+            background: var(--card2);
+            padding: 13px 2px;
+            border-radius: 9px; 
+            font-size: 0.68rem; 
+            text-align: center; 
+            border: 1px solid var(--border); 
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: pan-y;
+            color: var(--text-mid);
+            font-weight: 500;
+        }
+        .hora-chip:hover { border-color: var(--border-gold); color: var(--primary); }
         .hora-chip.active { 
             background: var(--grad) !important; 
             color: #000 !important; 
-            border: none !important;
-            font-weight: 900;
+            border-color: transparent !important;
+            font-weight: 800;
+            box-shadow: 0 2px 8px rgba(197,160,89,0.3);
         }
 
-        .item-list { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; background: #161616; border-radius: 20px; margin-bottom: 12px; border: 1px solid #222; }
-        .btn-del { color: var(--danger); background: none; border: none; font-weight: 800; font-size: 0.65rem; cursor: pointer; }
-        .btn-edit { color: var(--success); background: none; border: none; font-weight: 800; font-size: 0.65rem; cursor: pointer; margin-right: 15px; }
+        /* Folgas: agendado / bloqueado */
+        #grid-selecao-folgas .hora-chip.agendado {
+            background: rgba(224,82,82,0.1) !important;
+            border-color: rgba(224,82,82,0.3) !important;
+            color: #e05252 !important;
+            cursor: not-allowed !important;
+            position: relative;
+        }
+        #grid-selecao-folgas .hora-chip.agendado::after {
+            content: '✕';
+            position: absolute;
+            top: 2px; right: 4px;
+            font-size: 0.45rem;
+            opacity: 0.6;
+        }
+        #grid-selecao-folgas .hora-chip.bloqueado {
+            background: rgba(76,175,125,0.08) !important;
+            border-color: rgba(76,175,125,0.25) !important;
+            color: var(--success) !important;
+            cursor: not-allowed !important;
+        }
+        #grid-selecao-folgas .hora-chip[title]:hover::before {
+            content: attr(title);
+            position: absolute;
+            bottom: calc(100% + 4px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #111;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.55rem;
+            white-space: nowrap;
+            z-index: 100;
+            pointer-events: none;
+        }
 
-        .hint-box { background: rgba(197, 160, 89, 0.1); border: 1px dashed var(--primary); padding: 15px; border-radius: 15px; margin-bottom: 15px; }
-        .premium-badge { position: absolute; top: 15px; right: -30px; background: var(--grad); color: #000; padding: 5px 35px; font-size: 0.5rem; font-weight: 900; transform: rotate(45deg); text-transform: uppercase; }
-        /* 1. Ajuste da Grade de Horários (Sem a barra cinza) */
-        /* Ajuste da Grade de Horários */
+        /* ─── List items (equipe) ─── */
+        .item-list { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 16px 18px; 
+            background: var(--card2); 
+            border-radius: var(--radius-sm); 
+            margin-bottom: 8px; 
+            border: 1px solid var(--border);
+            transition: border-color 0.2s;
+        }
+        .item-list:hover { border-color: var(--border-gold); }
+        .btn-del { color: var(--danger); background: none; border: none; font-weight: 700; font-size: 0.65rem; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background 0.2s; }
+        .btn-del:hover { background: rgba(224,82,82,0.1); }
+        .btn-edit { color: var(--success); background: none; border: none; font-weight: 700; font-size: 0.65rem; cursor: pointer; margin-right: 8px; padding: 4px 8px; border-radius: 6px; transition: background 0.2s; }
+        .btn-edit:hover { background: rgba(76,175,125,0.1); }
+
+        /* ─── Hint box ─── */
+        .hint-box { 
+            background: var(--primary-dim); 
+            border: 1px solid var(--border-gold); 
+            padding: 13px 15px; 
+            border-radius: var(--radius-sm); 
+            margin-bottom: 12px; 
+        }
+
+        /* ─── Premium badge ─── */
+        .premium-badge { 
+            position: absolute; 
+            top: 18px; right: -28px; 
+            background: var(--grad); 
+            color: #000; 
+            padding: 4px 36px; 
+            font-size: 0.45rem; 
+            font-weight: 900; 
+            transform: rotate(45deg); 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ─── Grade de horários ─── */
         #render-horarios-grade {
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
-            gap: 8px; 
-            position: relative;
-            padding-right: 0;
+            gap: 6px;
         }
-        
-        /* Grid de Barbeiros Menor */
+
+        /* ─── Barbeiro selector ─── */
         .barbeiro-selector-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 3 por linha para ocupar menos espaço vertical */
-            gap: 8px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 7px;
             margin: 10px 0;
         }
-        
-        /* Card de Barbeiro Mini */
-        /* Card de Barbeiro Mini */
+
         .barbeiro-card-link {
-            background: #161616;
-            border: 1px solid #282828;
-            padding: 8px 4px; 
-            border-radius: 12px;
+            background: var(--card2);
+            border: 1px solid var(--border);
+            padding: 10px 6px; 
+            border-radius: var(--radius-sm);
             text-align: center;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.2s;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 3px;
+            gap: 4px;
             pointer-events: auto !important;
         }
-        
-        /* Nome do profissional em AMARELO */
+        .barbeiro-card-link:hover { border-color: var(--border-gold); }
+
         .barbeiro-card-link b { 
             font-size: 0.55rem; 
             text-transform: uppercase; 
-            color: var(--primary); /* Usa o dourado/amarelo do seu tema */
+            color: var(--primary);
             font-weight: 700;
+            letter-spacing: 0.3px;
         }
-        
-        /* Ícone (Emoji) */
-        .barbeiro-card-link span { 
-            font-size: 1rem; 
-        }
-        
-        /* Quando estiver SELECIONADO */
+        .barbeiro-card-link span { font-size: 1.1rem; }
+
         .barbeiro-card-link.active {
             background: var(--grad);
-            border-color: var(--primary);
+            border-color: transparent;
+            box-shadow: 0 2px 12px rgba(197,160,89,0.25);
         }
-        
-        /* Nome fica PRETO no fundo amarelo quando selecionado para dar contraste */
-        .barbeiro-card-link.active b { 
-            color: #000; 
-            font-weight: 900; 
-        }
-        
+        .barbeiro-card-link.active b { color: #000; font-weight: 900; }
+
         .select-hidden { display: none !important; }
-        
-        /* Container com rolagem para os horários */
+
+        /* ─── Scroll grade ─── */
         .scroll-grade {
-            max-height: 250px; /* Altura de aproximadamente 4 linhas de chips */
+            max-height: 240px;
             overflow-y: auto;
             padding: 10px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 15px;
-            border: 1px solid #222;
-            margin-bottom: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            margin-bottom: 12px;
             scrollbar-width: thin;
-            scrollbar-color: var(--primary) #1a1a1a;
+            scrollbar-color: rgba(197,160,89,0.3) transparent;
         }
-        
-        /* Estilo da "seta" ou indicador de rolagem */
+
         .scroll-hint {
             text-align: center;
             color: var(--primary);
-            font-size: 0.7rem;
-            margin-bottom: 5px;
-            animation: bounce 2s infinite;
+            font-size: 0.65rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            opacity: 0.7;
+            animation: bounce 2.5s ease infinite;
         }
-        
+
         @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-            40% {transform: translateY(-5px);}
-            60% {transform: translateY(-3px);}
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
         }
-            </style>
+
+        /* ─── Pulse animation for urgent alerts ─── */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+    </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     TELA DE LOGIN
-══════════════════════════════════════ -->
-<div id="login-screen" style="
-    position:fixed;inset:0;z-index:9999;
-    background:#0a0a0a;
-    display:flex;align-items:center;justify-content:center;
-    font-family:'Inter',sans-serif;padding:20px;">
-    <div style="
-        background:#141414;border:1px solid #2a2a2a;border-radius:20px;
-        padding:36px 28px;width:100%;max-width:380px;
-        box-shadow:0 20px 60px rgba(0,0,0,.6);text-align:center;">
-        <div id="login-logo-wrap" style="margin-bottom:16px;">
-            <img id="login-logo" src="" alt="" style="max-width:80px;max-height:80px;object-fit:contain;border-radius:12px;display:none;">
-            <div id="login-logo-placeholder" style="font-size:48px;">💈</div>
-        </div>
-        <h2 id="login-nome-barbearia" style="
-            font-family:'Cinzel',serif;color:#c5a059;
-            font-size:1.3rem;letter-spacing:3px;margin:0 0 4px 0;">
-            CARREGANDO...
-        </h2>
-        <p style="color:#444;font-size:0.75rem;margin:0 0 28px 0;">PAINEL ADMINISTRATIVO</p>
-        <div style="text-align:left;margin-bottom:16px;">
-            <label style="display:block;font-size:0.7rem;font-weight:700;color:#666;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">Senha de Acesso</label>
-            <input type="password" id="login-senha" placeholder="••••••••"
-                style="width:100%;padding:14px;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:10px;color:#fff;font-family:Inter,sans-serif;font-size:1rem;"
-                onkeydown="if(event.key==='Enter') fazerLogin()">
-        </div>
-        <div id="login-erro" style="display:none;color:#ff4d4d;font-size:0.75rem;margin-bottom:12px;background:#1a0a0a;padding:8px;border-radius:8px;border:1px solid #3a1010;">
-            ❌ Senha incorreta. Tente novamente.
-        </div>
-        <button onclick="fazerLogin()" style="
-            width:100%;padding:15px;background:linear-gradient(135deg,#c5a059,#a68549);
-            color:#000;font-weight:800;font-size:0.9rem;border:none;border-radius:10px;
-            cursor:pointer;font-family:Inter,sans-serif;letter-spacing:1px;">
-            ENTRAR
-        </button>
-        <p style="color:#333;font-size:0.65rem;margin-top:16px;">Acesso exclusivo ao administrador</p>
-    </div>
+<!-- TELA DE LOGIN -->
+<div id="login-screen" style="position:fixed;inset:0;background:#080808;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px;padding:30px;">
+  <div style="text-align:center;margin-bottom:10px;">
+    <div style="font-family:Cinzel,serif;color:#c5a059;font-size:1.4rem;letter-spacing:4px;text-shadow:0 0 20px rgba(197,160,89,0.4);">EL NEGRONES</div>
+    <div style="font-size:0.6rem;color:#444;letter-spacing:2px;margin-top:4px;">PAINEL ADMINISTRATIVO</div>
+  </div>
+  <div style="width:100%;max-width:340px;background:#111;border:1px solid #1e1e1e;border-radius:20px;padding:30px;box-shadow:0 20px 60px rgba(0,0,0,0.8);">
+    <label style="font-size:0.6rem;color:#c5a059;font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:8px;">E-mail</label>
+    <input type="email" id="login-email" placeholder="seu@email.com" style="width:100%;padding:14px;border-radius:12px;border:1px solid #222;background:#0e0e0e;color:#fff;font-size:0.9rem;margin-bottom:14px;">
+    <label style="font-size:0.6rem;color:#c5a059;font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:8px;">Senha</label>
+    <input type="password" id="login-senha" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()" style="width:100%;padding:14px;border-radius:12px;border:1px solid #222;background:#0e0e0e;color:#fff;font-size:0.9rem;margin-bottom:20px;">
+    <button onclick="fazerLogin()" style="width:100%;padding:16px;border-radius:12px;background:linear-gradient(135deg,#d4af6a,#b8923e);color:#000;font-weight:900;font-size:0.8rem;border:none;cursor:pointer;letter-spacing:1px;text-transform:uppercase;">ENTRAR</button>
+    <div id="login-erro" style="display:none;margin-top:12px;color:#e05252;font-size:0.7rem;text-align:center;"></div>
+  </div>
 </div>
+
 
 <div id="main-app" style="display:none;">
     <div class="top-nav-container">
-        <!-- Nome da barbearia no topo -->
-        <div style="text-align:center;padding:6px 0 2px 0;">
-            <span id="topbar-nome-barbearia" style="font-family:'Cinzel',serif;color:#c5a059;font-size:0.8rem;letter-spacing:2px;font-weight:700;opacity:0.8;"></span>
-        </div>
         <div class="tab-bar">
             <div class="tab-btn active" onclick="switchTab('agenda', this)"><span>📅</span><span>AGENDA</span></div>
             <div class="tab-btn" onclick="switchTab('atendimento', this)"><span>✅</span><span>DATAS</span></div>
@@ -480,56 +670,13 @@
                 <div id="render-folgas"></div>
             </div>
             
-                <div id="tab-config" class="tab-content" style="display:none;">
-
-                <div class="card">
-                    <h3>🏪 Nome da Barbearia</h3>
-                    <label>Nome exibido no sistema</label>
-                    <input type="text" id="conf-nome-barbearia" placeholder="Ex: Barbearia do João">
-                    <button class="btn-action" onclick="salvarNomeBarbearia()">Salvar Nome</button>
-                </div>
-
-                <div class="card">
-                    <h3>🔐 Alterar Senha de Acesso</h3>
-                    <label>Senha atual</label>
-                    <input type="password" id="conf-senha-atual" placeholder="••••••••">
-                    <label>Nova senha</label>
-                    <input type="password" id="conf-senha-nova" placeholder="••••••••">
-                    <label>Confirmar nova senha</label>
-                    <input type="password" id="conf-senha-confirma" placeholder="••••••••">
-                    <button class="btn-action" onclick="alterarSenha()">Alterar Senha</button>
-                    <div id="msg-senha" style="display:none;margin-top:8px;padding:10px;border-radius:8px;font-size:0.8rem;font-weight:700;text-align:center;"></div>
-                </div>
-
-                <div class="card">
-                    <h3>Logo da Barbearia</h3>
-                    <label>Imagem atual</label>
-                    <div style="text-align:center; margin-bottom:15px;">
-                        <img id="preview-logo-admin" src="" alt="Logo" style="max-width:160px; max-height:160px; object-fit:contain; border-radius:12px; display:none; border:1px solid #333;">
-                        <p id="txt-sem-logo" style="color:#555; font-size:0.75rem;">Nenhuma logo salva.</p>
-                    </div>
-                    <label>Selecionar nova logo</label>
-                    <input type="file" id="input-logo" accept="image/*" onchange="previewLogo(event)" style="padding:12px;">
-                    <button class="btn-action" onclick="salvarLogo()">Salvar Logo</button>
-                </div>
-
-                <div class="card">
-                    <h3>Endereço da Barbearia</h3>
-                    <label>Endereço exibido no site</label>
-                    <input type="text" id="conf-endereco" placeholder="Ex: Rua das Flores, 123 - Centro - Cidade - SP">
-                    <label>Instagram (só o usuário)</label>
-                    <input type="text" id="conf-instagram" placeholder="Ex: el_negrones">
-                    <label>WhatsApp (só números com DDD)</label>
-                    <input type="text" id="conf-whatsapp" placeholder="Ex: 5512996025236">
-                    <button class="btn-action" onclick="salvarInfoBarbearia()">Salvar</button>
-                </div>
-
+                    <div id="tab-config" class="tab-content" style="display:none;">
                 <div class="card">
                     <div class="premium-badge">PREMIUM</div>
                     <h3>Assinatura</h3>
                     <p id="txt-restam" style="font-weight: 800; color: var(--primary); margin-bottom: 5px;">Calculando...</p>
                     <p id="txt-expira" style="font-size:0.75rem; color: var(--text-dim); margin-bottom: 15px; display:none;">⏳ Expira em: <span id="val-expira">—</span></p>
-                    <input type="text" id="input-codigo-ativacao" placeholder="Código de 30 dias + dias restantes">
+                    <input type="text" id="input-codigo-ativacao" placeholder="Código mensal">
                     <button class="btn-action" onclick="validarCodigoAtivacao()">Ativar</button>
                 </div>
             
@@ -561,6 +708,37 @@
                     <input type="password" id="conf-telegram-chatid">
                     <button class="btn-outline" onclick="salvarConfigBot()">Salvar Configuração</button>
                 </div>
+
+                <div class="card">
+                    <h3>🌐 Configurações do Site</h3>
+                    <label>URL da Logo</label>
+                    <input type="text" id="conf-logo-url" placeholder="https://...imagem.png">
+                    <label>Endereço</label>
+                    <input type="text" id="conf-endereco" placeholder="Rua Exemplo, 123 - Cidade - SP">
+                    <label>Instagram (sem @)</label>
+                    <input type="text" id="conf-instagram" placeholder="el_negrones">
+                    <label>WhatsApp (somente números)</label>
+                    <input type="text" id="conf-whatsapp" placeholder="12996025236">
+                    <button class="btn-action" onclick="salvarConfigSite()">Salvar Configurações do Site</button>
+                    <div id="site-feedback" style="display:none;margin-top:10px;color:var(--success);font-size:0.7rem;text-align:center;">✓ Configurações salvas!</div>
+                </div>
+
+                <div class="card">
+                    <h3>🔐 Alterar Senha</h3>
+                    <label>Senha Atual</label>
+                    <input type="password" id="conf-senha-atual" placeholder="••••••••">
+                    <label>Nova Senha</label>
+                    <input type="password" id="conf-senha-nova" placeholder="••••••••">
+                    <label>Confirmar Nova Senha</label>
+                    <input type="password" id="conf-senha-conf" placeholder="••••••••">
+                    <button class="btn-action" onclick="alterarSenha()">Alterar Senha</button>
+                    <div id="senha-feedback" style="display:none;margin-top:10px;font-size:0.7rem;text-align:center;"></div>
+                </div>
+
+                <div class="card" style="text-align:center;">
+                    <button class="btn-outline" onclick="fazerLogout()" style="color:var(--danger);border-color:var(--danger);">🚪 Sair da Conta</button>
+                </div>
+
                 <br> 
                     <img src="LogoCoelho.png" alt="Logo" style="width:50px;height:50px;object-fit:contain;opacity:0.5;display:block;margin:0 auto 10px auto;">
             </div>
@@ -568,7 +746,7 @@
 </div>
 
 <script>
-    const firebaseConfig = { 
+    const firebaseConfig = {
         apiKey: "AIzaSyCpgSr9MCmJvylVZgS0Acj0_u8UT8tkl-o",
         authDomain: "projeto-agend-barber.firebaseapp.com",
         projectId: "projeto-agend-barber",
@@ -577,179 +755,92 @@
         appId: "1:368845787419:web:cc902e9081e3a35cac2ae1"
     };
     firebase.initializeApp(firebaseConfig);
-    const _db = firebase.firestore();
+    const db = firebase.firestore();
+    const auth = firebase.auth();
 
-    // ── MULTI-TENANT: lê o ID do cliente pela URL ──
-    const _clienteId = new URLSearchParams(window.location.search).get('id');
-    if (!_clienteId) {
-        document.body.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a0a;font-family:Inter,sans-serif;text-align:center;padding:20px">
-            <div>
-                <div style="font-size:48px;margin-bottom:16px">⛔</div>
-                <div style="color:#c5a059;font-size:20px;font-weight:800;margin-bottom:8px">LINK INVÁLIDO</div>
-                <div style="color:#666;font-size:14px">Este link não contém um ID de barbearia válido.<br>Verifique o link enviado pelo administrador.</div>
-            </div>
-        </div>`;
-        throw new Error('ID do cliente não informado na URL');
-    }
+    // ===== AUTENTICAÇÃO =====
+    let adminUser = null;
 
-    // Verifica se o cliente existe e está ativo, carrega nome e logo
-    _db.collection('clientes').doc(_clienteId).get().then(snap => {
-        if (!snap.exists || !snap.data().ativo) {
-            document.body.innerHTML = `
-            <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a0a;font-family:Inter,sans-serif;text-align:center;padding:20px">
-                <div>
-                    <div style="font-size:48px;margin-bottom:16px">🔒</div>
-                    <div style="color:#c5a059;font-size:20px;font-weight:800;margin-bottom:8px">ACESSO BLOQUEADO</div>
-                    <div style="color:#666;font-size:14px">Esta barbearia não está ativa.<br>Entre em contato com o suporte.</div>
-                </div>
-            </div>`;
+    // Verifica estado do login ao carregar
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            adminUser = user;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            inicializarAdmin();
         } else {
-            const nome = snap.data().nome || 'BARBEARIA';
-            document.title = '💈 Admin | ' + nome;
-            // Preenche nome na tela de login
-            const elNome = document.getElementById('login-nome-barbearia');
-            if (elNome) elNome.textContent = nome;
-            const elTop = document.getElementById('topbar-nome-barbearia');
-            if (elTop) elTop.textContent = nome;
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('main-app').style.display = 'none';
         }
     });
 
-    // Proxy do db que prefixa todas as coleções com clientes/{id}/
-    // Retorna a CollectionReference real do Firestore para compatibilidade total
-    const db = {
-        collection: (col) => _db.collection('clientes').doc(_clienteId).collection(col),
-        batch: () => _db.batch()
-    };
-
-    // ══════════════════════════════════════
-    // SISTEMA DE LOGIN COM SENHA
-    // ══════════════════════════════════════
-    const SENHA_PADRAO = 'barber123';
-    const SESSION_KEY  = 'adm_auth_' + _clienteId;
-
-    // Verifica se já tem sessão ativa nesta aba
-    if (sessionStorage.getItem(SESSION_KEY) === 'ok') {
-        mostrarApp();
-    } else {
-        carregarLogoLogin();
-    }
-
-    function mostrarApp() {
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('main-app').style.display = 'block';
-        // Carrega nome no input de config quando entrar
-        setTimeout(carregarNomeBarbeariaInput, 800);
-    }
-
-    async function carregarLogoLogin() {
+    async function fazerLogin() {
+        const email = document.getElementById('login-email').value.trim();
+        const senha = document.getElementById('login-senha').value;
+        const erro = document.getElementById('login-erro');
+        erro.style.display = 'none';
+        if (!email || !senha) { erro.textContent = 'Preencha e-mail e senha.'; erro.style.display = 'block'; return; }
         try {
-            const doc = await db.collection('configuracao').doc('info').get();
-            if (doc.exists && doc.data().logo) {
-                const img = document.getElementById('login-logo');
-                const ph  = document.getElementById('login-logo-placeholder');
-                img.src = doc.data().logo;
-                img.style.display = 'block';
-                if (ph) ph.style.display = 'none';
-            }
-            if (doc.exists && doc.data().nomeBarbearia) {
-                const el = document.getElementById('login-nome-barbearia');
-                if (el) el.textContent = doc.data().nomeBarbearia.toUpperCase();
-            }
-        } catch(e) {}
-    }
-
-    window.fazerLogin = async function() {
-        const digitado = document.getElementById('login-senha').value;
-        const erroEl   = document.getElementById('login-erro');
-        erroEl.style.display = 'none';
-
-        try {
-            // Busca senha salva no Firestore
-            const cfgDoc = await db.collection('configuracao').doc('acesso').get();
-            const senhaCorreta = (cfgDoc.exists && cfgDoc.data().senha) ? cfgDoc.data().senha : SENHA_PADRAO;
-
-            if (digitado === senhaCorreta) {
-                sessionStorage.setItem(SESSION_KEY, 'ok');
-                mostrarApp();
-            } else {
-                erroEl.style.display = 'block';
-                document.getElementById('login-senha').value = '';
-                document.getElementById('login-senha').focus();
-            }
+            await auth.signInWithEmailAndPassword(email, senha);
         } catch(e) {
-            // Fallback para senha padrão se falhar conexão
-            if (digitado === SENHA_PADRAO) {
-                sessionStorage.setItem(SESSION_KEY, 'ok');
-                mostrarApp();
-            } else {
-                erroEl.style.display = 'block';
-            }
+            erro.textContent = 'E-mail ou senha incorretos.';
+            erro.style.display = 'block';
         }
-    };
-
-    // ══════════════════════════════════════
-    // NOME DA BARBEARIA
-    // ══════════════════════════════════════
-    async function carregarNomeBarbeariaInput() {
-        try {
-            const doc = await db.collection('configuracao').doc('info').get();
-            const nome = doc.exists && doc.data().nomeBarbearia ? doc.data().nomeBarbearia : '';
-            const inp = document.getElementById('conf-nome-barbearia');
-            if (inp) inp.value = nome;
-        } catch(e) {}
     }
 
-    window.salvarNomeBarbearia = async function() {
-        const nome = document.getElementById('conf-nome-barbearia').value.trim();
-        if (!nome) { alert('Digite o nome da barbearia!'); return; }
+    async function fazerLogout() {
+        await auth.signOut();
+    }
+
+    async function alterarSenha() {
+        const atual = document.getElementById('conf-senha-atual').value;
+        const nova = document.getElementById('conf-senha-nova').value;
+        const conf = document.getElementById('conf-senha-conf').value;
+        const fb = document.getElementById('senha-feedback');
+        fb.style.display = 'block';
+        if (!atual || !nova || !conf) { fb.style.color = 'var(--danger)'; fb.textContent = 'Preencha todos os campos.'; return; }
+        if (nova !== conf) { fb.style.color = 'var(--danger)'; fb.textContent = 'As senhas novas não coincidem.'; return; }
+        if (nova.length < 6) { fb.style.color = 'var(--danger)'; fb.textContent = 'Nova senha deve ter ao menos 6 caracteres.'; return; }
         try {
-            await db.collection('configuracao').doc('info').set({ nomeBarbearia: nome }, { merge: true });
-            // Atualiza também no documento do cliente (ativador)
-            await _db.collection('clientes').doc(_clienteId).update({ nome: nome });
-            document.title = '💈 Admin | ' + nome;
-            const elTop = document.getElementById('topbar-nome-barbearia');
-            if (elTop) elTop.textContent = nome;
-            const elLogin = document.getElementById('login-nome-barbearia');
-            if (elLogin) elLogin.textContent = nome.toUpperCase();
-            alert('✅ Nome salvo com sucesso!');
-        } catch(e) { alert('Erro ao salvar: ' + e.message); }
-    };
-
-    // ══════════════════════════════════════
-    // ALTERAR SENHA
-    // ══════════════════════════════════════
-    window.alterarSenha = async function() {
-        const atual    = document.getElementById('conf-senha-atual').value;
-        const nova     = document.getElementById('conf-senha-nova').value;
-        const confirma = document.getElementById('conf-senha-confirma').value;
-        const msgEl    = document.getElementById('msg-senha');
-
-        const mostrarMsg = (txt, ok) => {
-            msgEl.textContent = txt;
-            msgEl.style.display = 'block';
-            msgEl.style.background = ok ? '#0a2a0a' : '#2a0a0a';
-            msgEl.style.color = ok ? '#00ff88' : '#ff4d4d';
-            msgEl.style.border = '1px solid ' + (ok ? '#1a5a1a' : '#5a1a1a');
-        };
-
-        if (!atual || !nova || !confirma) { mostrarMsg('Preencha todos os campos.', false); return; }
-        if (nova !== confirma)            { mostrarMsg('A nova senha e a confirmação não coincidem.', false); return; }
-        if (nova.length < 4)              { mostrarMsg('A nova senha deve ter pelo menos 4 caracteres.', false); return; }
-
-        try {
-            const cfgDoc = await db.collection('configuracao').doc('acesso').get();
-            const senhaAtual = (cfgDoc.exists && cfgDoc.data().senha) ? cfgDoc.data().senha : SENHA_PADRAO;
-
-            if (atual !== senhaAtual) { mostrarMsg('Senha atual incorreta.', false); return; }
-
-            await db.collection('configuracao').doc('acesso').set({ senha: nova }, { merge: true });
-            mostrarMsg('✅ Senha alterada com sucesso!', true);
+            const cred = firebase.auth.EmailAuthProvider.credential(adminUser.email, atual);
+            await adminUser.reauthenticateWithCredential(cred);
+            await adminUser.updatePassword(nova);
+            fb.style.color = 'var(--success)'; fb.textContent = '✓ Senha alterada com sucesso!';
             document.getElementById('conf-senha-atual').value = '';
             document.getElementById('conf-senha-nova').value = '';
-            document.getElementById('conf-senha-confirma').value = '';
-        } catch(e) { mostrarMsg('Erro: ' + e.message, false); }
-    };
+            document.getElementById('conf-senha-conf').value = '';
+        } catch(e) {
+            fb.style.color = 'var(--danger)';
+            fb.textContent = e.code === 'auth/wrong-password' ? 'Senha atual incorreta.' : 'Erro: ' + e.message;
+        }
+    }
+
+    // ===== CONFIGURAÇÕES DO SITE =====
+    async function carregarConfigSiteAdmin() {
+        try {
+            const doc = await db.collection('configuracao').doc('site').get();
+            if (doc.exists) {
+                const d = doc.data();
+                if (d.logoUrl) document.getElementById('conf-logo-url').value = d.logoUrl;
+                if (d.endereco) document.getElementById('conf-endereco').value = d.endereco;
+                if (d.instagram) document.getElementById('conf-instagram').value = d.instagram;
+                if (d.whatsapp) document.getElementById('conf-whatsapp').value = d.whatsapp;
+            }
+        } catch(e) { console.log('Erro ao carregar config site:', e); }
+    }
+
+    async function salvarConfigSite() {
+        const logoUrl = document.getElementById('conf-logo-url').value.trim();
+        const endereco = document.getElementById('conf-endereco').value.trim();
+        const instagram = document.getElementById('conf-instagram').value.trim();
+        const whatsapp = document.getElementById('conf-whatsapp').value.trim();
+        try {
+            await db.collection('configuracao').doc('site').set({ logoUrl, endereco, instagram, whatsapp }, { merge: true });
+            const fb = document.getElementById('site-feedback');
+            fb.style.display = 'block';
+            setTimeout(() => fb.style.display = 'none', 3000);
+        } catch(e) { alert('Erro ao salvar: ' + e.message); }
+    }
 
     // Carrega chave PIX do Firebase
     async function loadPixKey() {
@@ -759,7 +850,8 @@
             document.getElementById('pix-copia-cola').value = pix;
         } catch(e) { console.log('Erro ao carregar PIX:', e); }
     }
-    loadPixKey();
+
+    // --- FUNÇÃO DE LIMPEZA APRIMORADA ---
 async function limparAgendamentosConcluidos() {
     // 1. Obtém o momento exato ATUAL no fuso de Brasília
     const agora = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
@@ -817,16 +909,16 @@ limparAgendamentosConcluidos();
     todosHorarios.push("00:00");
 
 
-    window.onload = async () => {
+    async function inicializarAdmin() {
+        loadPixKey();
+        carregarConfigSiteAdmin();
         const hj = new Date().toISOString().split("T")[0];
         
-        // Bloqueia datas passadas
         if(document.getElementById('f-data')) document.getElementById('f-data').setAttribute('min', hj);
         if(document.getElementById('f-data-especifica')) {
             document.getElementById('f-data-especifica').setAttribute('min', hj);
         }
         
-        // Listeners para folgas
         document.getElementById('f-data-especifica').addEventListener('change', () => {
             if(tipoBloqueioAtual === 'data') carregarFolgas();
         });
@@ -834,26 +926,19 @@ limparAgendamentosConcluidos();
             if(tipoBloqueioAtual === 'recorrente') carregarFolgas();
         });
     
-        // Inicializa grades de horários
         const html = todosHorarios.map(h => `<div class="hora-chip" data-time="${h}" onclick="toggleElement(this)">${h}</div>`).join('');
         document.getElementById('render-horarios-grade').innerHTML = html;
         document.getElementById('grid-selecao-folgas').innerHTML = html;
         
-        // === NOVO: LIMPEZA AUTOMÁTICA DE AGENDAMENTOS ANTIGOS ===
-        // Executa imediatamente ao carregar (limpa o que já passou)
         await limparAgendamentosAntigos();
-        // Agenda para rodar todos os dias à meia-noite
         agendarProximaLimpeza();
-        // =========================================================
         
         gerarFiltroDatasAgenda();
         await verificarAssinatura();
         carregarEquipe();
         carregarAgenda();
         carregarConfigBot();
-        carregarEndereco();
-        carregarLogo();
-    };
+    }
 
     function toggleElement(el) { el.classList.toggle('active'); }
 
@@ -924,6 +1009,7 @@ async function limparAgendamentosAntigos() {
 
         snap.forEach((doc) => {
             // Exclui permanentemente (não marca como concluído)
+            // Inclui também os cancelados de datas passadas
             batch.delete(db.collection("agenda").doc(doc.id));
             contador++;
         });
@@ -941,6 +1027,41 @@ async function limparAgendamentosAntigos() {
     }
 }
 
+// --- LIMPEZA AUTOMÁTICA DE BLOQUEIOS DE DIA ÚNICO EXPIRADOS (7+ dias) ---
+async function limparBloqueiosDiaUnicoExpirados() {
+    const agora = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+    const limite = new Date(agora);
+    limite.setDate(limite.getDate() - 7);
+    const limiteISO = limite.toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+
+    try {
+        const snap = await db.collection("bloqueios")
+            .where("tipo", "==", "data")
+            .get();
+
+        if (snap.empty) return;
+
+        const batch = db.batch();
+        let contador = 0;
+
+        snap.forEach(doc => {
+            const d = doc.data();
+            if (d.data && d.data <= limiteISO) {
+                batch.delete(db.collection("bloqueios").doc(doc.id));
+                contador++;
+            }
+        });
+
+        if (contador > 0) {
+            await batch.commit();
+            console.log(`${contador} bloqueios de dia único expirados removidos automaticamente.`);
+        }
+    } catch (e) {
+        console.error("Erro ao limpar bloqueios expirados:", e);
+    }
+}
+limparBloqueiosDiaUnicoExpirados();
+
 // --- AGENDADOR PARA RODAR À MEIA-NOITE ---
 function agendarProximaLimpeza() {
     const agora = new Date();
@@ -954,6 +1075,7 @@ function agendarProximaLimpeza() {
     
     setTimeout(() => {
         limparAgendamentosAntigos();
+        limparBloqueiosDiaUnicoExpirados();
         // Reagenda para o próximo dia
         agendarProximaLimpeza();
     }, msAteMeiaNoite);
@@ -1062,6 +1184,8 @@ function agendarProximaLimpeza() {
         // 1. Processa Agendamentos para marcar na grade (Evita bloquear horário que já tem cliente)
         agSnap.forEach(doc => {
             const ag = doc.data();
+            // Ignora cancelados — horário está livre
+            if (ag.status === "cancelado") return;
             if(tipoBloqueioAtual === 'recorrente' && ag.data) {
                 // Converte a data do agendamento para descobrir o dia da semana
                 const dataAg = new Date(ag.data + 'T12:00:00');
@@ -1095,8 +1219,10 @@ function agendarProximaLimpeza() {
             
             if(horariosOcupados.has(hora)) {
                 let isAgendamento = false;
-                agSnap.forEach(doc => { 
-                    if(isHoraDentroIntervalo(hora, doc.data().hora, doc.data().duracao)) isAgendamento = true; 
+                agSnap.forEach(doc => {
+                    const ag = doc.data();
+                    if (ag.status === "cancelado") return;
+                    if(isHoraDentroIntervalo(hora, ag.hora, ag.duracao)) isAgendamento = true; 
                 });
                 
                 if(isAgendamento) {
@@ -1398,12 +1524,8 @@ async function excluirBloqueioDireto(id) {
     const dados = {
         nome: nome,
         servicos: servicos,
+        foto: fotoBase64 // Nova variável com a string da imagem
     };
-
-    // Só inclui a foto se uma nova imagem foi selecionada
-    if(fotoBase64) {
-        dados.foto = fotoBase64;
-    }
 
     if(id) {
         await db.collection("barbeiros").doc(id).update(dados);
@@ -1469,115 +1591,86 @@ async function excluirBloqueioDireto(id) {
     }
 
     async function validarCodigoAtivacao() {
-    const cod = document.getElementById('input-codigo-ativacao').value.trim().toUpperCase();
+    const cod = document.getElementById('input-codigo-ativacao').value.trim();
     if (!cod) return alert("Digite um código.");
-
+    
     try {
-        const agora = Date.now();
-
-        // ── ESTRATÉGIA 1: Token do ativador (salvo em clientes/{id}.token) ──
-        const clienteSnap = await _db.collection('clientes').doc(_clienteId).get();
-        if (clienteSnap.exists) {
-            const cliente = clienteSnap.data();
-            if (cliente.token && cliente.token.toUpperCase() === cod) {
-                const expira = cliente.tokenExpira || 0;
-                if (expira < agora) {
-                    alert("⏳ Token expirado! Peça ao administrador para renovar.");
-                    return;
-                }
-                // Token válido — ativa a assinatura usando a data de expiração do token
-                const assinaRef = db.collection("configuracao").doc("assinatura");
-                await assinaRef.set({ premiumAte: new Date(expira) }, { merge: true });
-                alert("✅ Assinatura ativada! Válida até " + new Date(expira).toLocaleDateString('pt-BR'));
-                location.reload();
-                return;
-            }
-        }
-
-        // ── ESTRATÉGIA 2: Código antigo (coleção global codigos_ativacao) ──
-        const docRef = _db.collection("codigos_ativacao").doc(cod);
+        const docRef = db.collection("codigos_ativacao").doc(cod);
         const docSnap = await docRef.get();
-
+        
         if (docSnap.exists) {
             const dados = docSnap.data();
-            if (dados.usado === true) { alert("Este código já foi utilizado."); return; }
+            
+            if (dados.usado === false) {
+                // 1. Busca a assinatura atual
+                const assinaRef = db.collection("configuracao").doc("assinatura");
+                const assinaSnap = await assinaRef.get();
+                
+                const agora = new Date();
 
-            const assinaRef = db.collection("configuracao").doc("assinatura");
-            const assinaSnap = await assinaRef.get();
-            let dataBase = new Date();
-            if (assinaSnap.exists && assinaSnap.data().premiumAte) {
-                const atual = assinaSnap.data().premiumAte.toDate();
-                if (atual > new Date()) dataBase = atual;
+                // 2. Dia fixo gravado no código (ex: 17). Fallback: setMonth(+1)
+                const diaFixo = dados.diaVencimento || null;
+
+                let novaDataFinal;
+
+                if (diaFixo) {
+                    // Determina o mês de referência:
+                    // - Se ainda tem assinatura ativa → próximo mês após o vencimento atual
+                    // - Se expirou ou não tem → próximo mês após hoje
+                    let mesBase, anoBase;
+
+                    if (assinaSnap.exists && assinaSnap.data().premiumAte) {
+                        const vencAtual = assinaSnap.data().premiumAte.toDate();
+                        if (vencAtual > agora) {
+                            mesBase = vencAtual.getMonth() + 1;
+                            anoBase = vencAtual.getFullYear();
+                        } else {
+                            mesBase = agora.getMonth() + 1;
+                            anoBase = agora.getFullYear();
+                        }
+                    } else {
+                        mesBase = agora.getMonth() + 1;
+                        anoBase = agora.getFullYear();
+                    }
+
+                    // Ajuste de ano se passar de dezembro
+                    if (mesBase > 11) {
+                        mesBase = 0;
+                        anoBase += 1;
+                    }
+
+                    // Monta a data com o dia fixo (ex: 17/06/2026 às 23:59:59)
+                    novaDataFinal = new Date(anoBase, mesBase, diaFixo, 23, 59, 59);
+
+                } else {
+                    // Fallback sem diaFixo: soma 1 mês no vencimento ou hoje
+                    let dataBase = new Date();
+                    if (assinaSnap.exists && assinaSnap.data().premiumAte) {
+                        const vencAtual = assinaSnap.data().premiumAte.toDate();
+                        if (vencAtual > agora) dataBase = vencAtual;
+                    }
+                    novaDataFinal = new Date(dataBase);
+                    novaDataFinal.setMonth(novaDataFinal.getMonth() + 1);
+                }
+
+                // 3. Salva e confirma
+                const fmtData = novaDataFinal.toLocaleDateString('pt-BR');
+                await assinaRef.set({ premiumAte: novaDataFinal }, { merge: true });
+                await docRef.update({ usado: true, dataUso: agora });
+
+                alert(`✅ Assinatura renovada!\nNovo vencimento: ${fmtData}`);
+                location.reload(); 
+
+            } else { 
+                alert("Este código já foi utilizado."); 
             }
-            const dias = dados.dias || 30;
-            const novaData = new Date(dataBase.getTime() + dias * 24 * 60 * 60 * 1000);
-            await assinaRef.set({ premiumAte: novaData }, { merge: true });
-            await docRef.update({ usado: true, dataUso: new Date() });
-            alert("✅ Assinatura renovada! " + dias + " dias somados com sucesso.");
-            location.reload();
-        } else {
-            alert("❌ Código não encontrado. Verifique o token e tente novamente.");
+        } else { 
+            alert("Código não encontrado."); 
         }
-    } catch (e) {
-        alert("Erro na ativação: " + e.message);
+    } catch (e) { 
+        alert("Erro na ativação: " + e.message); 
     }
 }
-
-    async function salvarLogo() {
-        const input = document.getElementById('input-logo');
-        if (!input.files[0]) return alert("Selecione uma imagem.");
-        const reader = new FileReader();
-        reader.onload = async function(e) {
-            const base64 = e.target.result;
-            await db.collection("configuracao").doc("info").set({ logo: base64 }, { merge: true });
-            document.getElementById('preview-logo-admin').src = base64;
-            document.getElementById('preview-logo-admin').style.display = 'block';
-            document.getElementById('txt-sem-logo').style.display = 'none';
-            alert("Logo salva com sucesso!");
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-
-    function previewLogo(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = document.getElementById('preview-logo-admin');
-            img.src = e.target.result;
-            img.style.display = 'block';
-            document.getElementById('txt-sem-logo').style.display = 'none';
-        };
-        reader.readAsDataURL(file);
-    }
-
-    async function carregarLogo() {
-        const doc = await db.collection("configuracao").doc("info").get();
-        if (doc.exists && doc.data().logo) {
-            const img = document.getElementById('preview-logo-admin');
-            img.src = doc.data().logo;
-            img.style.display = 'block';
-            document.getElementById('txt-sem-logo').style.display = 'none';
-        }
-    }
-
-    async function salvarInfoBarbearia() {
-        const endereco = document.getElementById('conf-endereco').value.trim();
-        const instagram = document.getElementById('conf-instagram').value.trim().replace('@', '');
-        const whatsapp = document.getElementById('conf-whatsapp').value.trim().replace(/\D/g, '');
-        await db.collection("configuracao").doc("info").set({ endereco, instagram, whatsapp }, { merge: true });
-        alert("Informações salvas com sucesso!");
-    }
-
-    async function carregarEndereco() {
-        const doc = await db.collection("configuracao").doc("info").get();
-        if (doc.exists) {
-            const d = doc.data();
-            if (d.endereco) document.getElementById('conf-endereco').value = d.endereco;
-            if (d.instagram) document.getElementById('conf-instagram').value = d.instagram;
-            if (d.whatsapp) document.getElementById('conf-whatsapp').value = d.whatsapp;
-        }
-    }
 
     async function salvarConfigBot() {
         const token = document.getElementById('conf-telegram-token').value;
@@ -1666,19 +1759,9 @@ async function excluirBloqueioDireto(id) {
     if (bId) q = q.where("barbeiroId", "==", bId);
     if (dataFiltro) q = q.where("data", "==", dataFiltro);
 
+    q = q.orderBy("data", "asc").orderBy("hora", "asc");
+
     q.onSnapshot(snap => {
-        // Ordena no cliente para evitar necessidade de índice composto no Firestore
-        const docs = [];
-        snap.forEach(doc => docs.push(doc));
-        docs.sort((a, b) => {
-            const da = a.data(), db2 = b.data();
-            if (da.data < db2.data) return -1;
-            if (da.data > db2.data) return 1;
-            if (da.hora < db2.hora) return -1;
-            if (da.hora > db2.hora) return 1;
-            return 0;
-        });
-        snap = { forEach: (fn) => docs.forEach(doc => fn(doc)), empty: docs.length === 0 };
         render.innerHTML = "";
         if (snap.empty) {
             render.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: var(--text-dim);"><span style="font-size: 3rem; display: block; margin-bottom: 10px;">📅</span><b style="color: var(--primary); font-size: 0.9rem; text-transform: uppercase;">Sem agendamentos</b></div>`;
@@ -1695,10 +1778,21 @@ async function excluirBloqueioDireto(id) {
             const nomeExibicao = ag.barbeiroNome || barbeirosNomes[ag.barbeiroId] || "Não definido";
             const dataBR = ag.data.split('-').reverse().join('/');
 
-            // --- LÓGICA DE STATUS CONCLUÍDO ---
+            // --- LÓGICA DE STATUS ---
+            const estaCancelado = ag.status === "cancelado";
             const estaConcluido = ag.concluido === true;
-            const estiloCardConcluido = estaConcluido ? "opacity: 0.6; filter: grayscale(0.5); border-color: #333;" : "border-color: #1a1a1a;";
-            const badgeStatus = estaConcluido ? `<span style="color: var(--success); font-size: 0.65rem; font-weight: 900; display: block; margin-top: 2px;">✅ SERVIÇO FEITO</span>` : "";
+
+            const estiloCardConcluido = estaConcluido
+                ? "opacity: 0.6; filter: grayscale(0.5); border-color: #333;"
+                : estaCancelado
+                    ? "border-color: #ff4d4d; background: #1a0a0a;"
+                    : "border-color: #1a1a1a;";
+
+            const badgeStatus = estaConcluido
+                ? `<span style="color: var(--success); font-size: 0.65rem; font-weight: 900; display: block; margin-top: 2px;">✅ SERVIÇO FEITO</span>`
+                : estaCancelado
+                    ? `<span style="color: #ff4d4d; font-size: 0.65rem; font-weight: 900; display: block; margin-top: 2px;">🚫 CANCELADO PELO CLIENTE</span>`
+                    : "";
 
             if (ag.data !== ultimaDataRenderizada) {
                 render.innerHTML += `
@@ -1730,15 +1824,34 @@ async function excluirBloqueioDireto(id) {
 
             const msgLembrete = `Olá ${ag.cliente}! ✂️\n\nConfirmando seu horário na *BARBEARIA EL NEGRONES*:\n📅 *Hoje, ${dataBR}*\n⏰ às *${ag.hora}*\n\nAté logo! 🔥`;
             const msgConfirmacao = `Olá ${ag.cliente}! ✅\n\nSeu agendamento na *BARBEARIA EL NEGRONES* foi recebido!\n\n📅 Data: *${dataBR}*\n⏰ Horário: *${ag.hora}*\n✂️ Serviço: *${ag.servico || '-'}*\n💈 Profissional: *${nomeExibicao}*\n\nTe aguardamos! 🔥`;
+            const msgCancelamento = `Olá ${ag.cliente}! ✂️\n\nPassando para confirmar que seu agendamento na *BARBEARIA EL NEGRONES* foi *cancelado*:\n\n📅 Data: *${dataBR}*\n⏰ Horário: *${ag.hora}*\n✂️ Serviço: *${ag.servico || '-'}*\n\nQualquer dúvida, estamos à disposição! 🔥`;
+
+            // --- BOTÕES CONFORME STATUS ---
+            let botoesHTML = "";
+            if (estaConcluido) {
+                botoesHTML = `<button onclick="excluir('agenda', '${doc.id}')" style="grid-column: span 3; background:var(--primary); color:#000; border:none; padding:8px; border-radius:8px; font-weight:900; font-size:0.6rem; cursor:pointer;">REMOVER DO HISTÓRICO</button>`;
+            } else if (estaCancelado) {
+                const jaAvisouCancel = localStorage.getItem(`avisado_cancel_${doc.id}`);
+                const estiloAvisar = jaAvisouCancel ? "background:#333; color:#777;" : "background:#ff4d4d; color:#fff;";
+                const textoAvisar = jaAvisouCancel ? "AVISADO ✅" : "📲 AVISAR CLIENTE";
+                botoesHTML = `
+                    <button onclick="marcarComoAvisado('${doc.id}', 'cancel'); window.open('https://wa.me/55${fone}?text=${window.encodeURIComponent(msgCancelamento)}')" style="${estiloAvisar} grid-column: span 2; border:none; padding:10px; border-radius:8px; font-weight:900; font-size:0.65rem; cursor:pointer;">${textoAvisar}</button>
+                    <button onclick="excluir('agenda', '${doc.id}')" style="background:transparent; color:#666; border:1px solid #333; padding:10px; border-radius:8px; font-weight:900; font-size:0.6rem; cursor:pointer;">REMOVER</button>`;
+            } else {
+                botoesHTML = `
+                    <button class="btn-lembrete" onclick="marcarComoAvisado('${doc.id}', 'lembrete'); window.open('https://wa.me/55${fone}?text=${window.encodeURIComponent(msgLembrete)}')" style="${estiloLembrete} border:none; padding:8px; border-radius:8px; font-weight:900; font-size:0.6rem; cursor:pointer;">${textoLembrete}</button>
+                    <button class="btn-conf" onclick="marcarComoAvisado('${doc.id}', 'conf'); window.open('https://wa.me/55${fone}?text=${window.encodeURIComponent(msgConfirmacao)}')" style="${estiloConf} border:none; padding:8px; border-radius:8px; font-weight:900; font-size:0.6rem; cursor:pointer;">${textoConf}</button>
+                    <button onclick="marcarComoConcluidoManual('${doc.id}')" style="background:var(--grad); color:#000; border:none; padding:8px; border-radius:8px; font-weight:900; font-size:0.6rem; cursor:pointer;">CONCLUIR</button>`;
+            }
 
             render.innerHTML += `
             <div class="agenda-card" id="card-${doc.id}" style="margin-bottom: 12px; border: 1px solid; ${estiloCardConcluido}">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
                     <div>
-                        <b style="font-size:1rem; text-transform:uppercase; color: #fff;">${ag.cliente}</b>
+                        <b style="font-size:1rem; text-transform:uppercase; color: ${estaCancelado ? '#ff4d4d' : '#fff'};">${ag.cliente}</b>
                         ${badgeStatus}
                     </div>
-                    <div class="badge-hora" style="background: #1a1a1a; padding: 5px 10px; border-radius: 8px; color: var(--primary); font-weight: 800; border: 1px solid #333;">${ag.hora}</div>
+                    <div class="badge-hora" style="background: #1a1a1a; padding: 5px 10px; border-radius: 8px; color: ${estaCancelado ? '#ff4d4d' : 'var(--primary)'}; font-weight: 800; border: 1px solid ${estaCancelado ? '#ff4d4d33' : '#333'}; ${estaCancelado ? 'text-decoration: line-through;' : ''}">${ag.hora}</div>
                 </div>
                 
                 <div style="background: rgba(255,255,255,0.02); border-radius: 12px; padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; border: 1px solid #1a1a1a;">
@@ -1747,20 +1860,10 @@ async function excluirBloqueioDireto(id) {
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;">
-                    ${estaConcluido ? 
-                        `<button onclick="excluir('agenda', '${doc.id}')" style="grid-column: span 3; background:var(--primary); color:#000; border:none; padding:8px; border-radius:8px; font-weight:900; font-size:0.6rem; cursor:pointer;">REMOVER DO HISTÓRICO</button>` :
-                        `
-                        <button class="btn-lembrete" onclick="marcarComoAvisado('${doc.id}', 'lembrete'); window.open('https://wa.me/55${fone}?text=${window.encodeURIComponent(msgLembrete)}')" style="${estiloLembrete} border:none; padding:8px; border-radius:8px; font-weight:900; font-size:0.6rem; cursor:pointer;">${textoLembrete}</button>
-                        <button class="btn-conf" onclick="marcarComoAvisado('${doc.id}', 'conf'); window.open('https://wa.me/55${fone}?text=${window.encodeURIComponent(msgConfirmacao)}')" style="${estiloConf} border:none; padding:8px; border-radius:8px; font-weight:900; font-size:0.6rem; cursor:pointer;">${textoConf}</button>
-                        <button onclick="marcarComoConcluidoManual('${doc.id}')" style="background:var(--grad); color:#000; border:none; padding:8px; border-radius:8px; font-weight:900; font-size:0.6rem; cursor:pointer;">CONCLUIR</button>
-                        `
-                    }
+                    ${botoesHTML}
                 </div>
             </div>`;
         });
-    }, error => {
-        console.error("Erro ao carregar agenda:", error);
-        render.innerHTML = `<div style="text-align: center; padding: 30px; color: var(--danger);"><b>⚠️ Erro ao carregar agendamentos</b><br><span style="font-size:0.7rem; color:#666;">${error.message}</span></div>`;
     });
 }
 

@@ -305,8 +305,18 @@
             content: "RESERVADO";
             font-size: 0.5rem;
             font-weight: 800;
-            color: #442222; /* Um vermelho bem escuro e discreto */
+            color: #442222;
             margin-top: 2px;
+        }
+
+        /* Slot bloqueado por duração de outro agendamento — sem "RESERVADO" */
+        .hora-btn.bloqueada {
+            background: #0a0a0a !important;
+            border: 1px solid #141414 !important;
+            color: #252525 !important;
+            cursor: not-allowed;
+            opacity: 0.5;
+            pointer-events: none;
         }
 
         .btn-principal {
@@ -1332,56 +1342,85 @@
                     return;
                 }
         
+                // Monta Set dos horários de INÍCIO real de agendamentos (para mostrar "RESERVADO" só neles)
+                const iniciosReais = new Set();
+                agSnap.docs.forEach(doc => {
+                    const ag = doc.data();
+                    if (ag.concluido === true || ag.status === "cancelado") return;
+                    iniciosReais.add(ag.hora);
+                });
+                // Bloqueios também são início real
+                blSnapData.docs.forEach(d => iniciosReais.add(d.data().hora));
+                blSnapSemana.docs.forEach(d => iniciosReais.add(d.data().hora));
+                // Carrinho também
+                carrinho.forEach(item => {
+                    if (item.data === data && item.barbeiroId === bId) iniciosReais.add(item.hora);
+                });
+
                 horariosGrade.forEach(h => {
                     const [hHora, hMin] = h.split(':').map(Number);
                     const hValor = hHora * 100 + hMin;
                     const jaPassou = (data === hojeISO && hValor <= horaAtualTotal);
-        
-                    // Verifica se o serviço atual cabe a partir deste horário sem bater no banco ou no carrinho
+
+                    // É um slot diretamente reservado (início real de agendamento)?
+                    const isInicioReal = iniciosReais.has(h);
+
+                    // É um slot travado apenas por duração de agendamento anterior?
+                    const isOverflow = !isInicioReal && ocupadosNoBanco.includes(h);
+
+                    // Verifica se o serviço atual cabe a partir deste horário
                     let conflito = false;
                     let checarHora = h;
                     for (let i = 0; i < slotsNecessarios; i++) {
-                        if (ocupadosNoBanco.includes(checarHora) || 
-                            ocupadosNoCarrinho.includes(checarHora) || 
+                        if (ocupadosNoBanco.includes(checarHora) ||
+                            ocupadosNoCarrinho.includes(checarHora) ||
                             !horariosGrade.includes(checarHora)) {
                             conflito = true;
                             break;
                         }
                         checarHora = somar10(checarHora);
                     }
-        
+
                     const isIndisponivel = conflito || jaPassou;
                     const btn = document.createElement("div");
-                    
-                    btn.className = "hora-btn " + (isIndisponivel ? "ocupada" : "");
-                    
-                    // Se o horário está indisponível por causa do carrinho, você pode dar um feedback visual diferente
-                    if (conflito && ocupadosNoCarrinho.includes(h)) {
+
+                    if (isInicioReal) {
+                        // Horário com agendamento real — mostra "RESERVADO"
+                        btn.className = "hora-btn ocupada";
+                        btn.textContent = h;
+                    } else if (isOverflow) {
+                        // Slot travado por duração — aparece apagado, sem texto "RESERVADO"
+                        btn.className = "hora-btn bloqueada";
+                        btn.textContent = h;
+                    } else if (conflito && ocupadosNoCarrinho.includes(h)) {
+                        // No carrinho do próprio cliente
+                        btn.className = "hora-btn ocupada";
                         btn.style.opacity = "0.5";
                         btn.innerHTML = `${h}<br><span style="font-size:0.5rem;">NO CARRINHO</span>`;
                     } else {
+                        btn.className = "hora-btn" + (isIndisponivel ? " ocupada" : "");
                         btn.textContent = h;
                     }
-        
+
                     if (!isIndisponivel) {
                         btn.onclick = () => {
                             document.querySelectorAll(".hora-btn").forEach(e => {
                                 e.classList.remove("selecionada", "previa-slot");
                             });
-        
+
                             btn.classList.add("selecionada");
                             horarioSelecionado = h;
-        
+
                             let proximoPreview = h;
                             for (let i = 1; i < slotsNecessarios; i++) {
                                 proximoPreview = somar10(proximoPreview);
                                 const botoes = Array.from(document.querySelectorAll(".hora-btn"));
-                                const btnSlot = botoes.find(b => b.textContent === proximoPreview);
+                                const btnSlot = botoes.find(b => b.textContent.trim().startsWith(proximoPreview));
                                 if (btnSlot) btnSlot.classList.add("previa-slot");
                             }
                         };
                     }
-                    
+
                     grid.appendChild(btn);
                 });
             } catch (error) {

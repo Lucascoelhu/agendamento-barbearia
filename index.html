@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>✂️ Nome da sua barbearia aqui | Agendamento</title>
+    <title>✂️ El Negrones | Agendamento</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
@@ -360,22 +360,14 @@
             flex-direction: column;
             align-items: center;
             gap: 6px;
-            min-height: 90px; /* Aumentado levemente para caber a foto */
+            min-height: 90px;
             justify-content: center;
         }
 
         @keyframes shimmer {
-            0% {
-                left: -60%;
-            }
-
-            30% {
-                left: 140%;
-            }
-
-            100% {
-                left: 140%;
-            }
+            0% { left: -60%; }
+            30% { left: 140%; }
+            100% { left: 140%; }
         }
         
         @keyframes slideUp {
@@ -383,17 +375,170 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* ===================== STEPS ===================== */
+
+        /* Barra de progresso no topo */
+        .steps-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin: 18px 0 22px 0;
+        }
+        .step-dot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+        }
+        .step-dot .dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #333;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 900;
+            color: #444;
+            transition: all 0.4s ease;
+        }
+        .step-dot .dot-label {
+            font-size: 0.55rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #444;
+            letter-spacing: 0.5px;
+            transition: color 0.4s ease;
+            white-space: nowrap;
+        }
+        .step-dot.active .dot {
+            border-color: var(--primary);
+            background: rgba(197, 160, 89, 0.15);
+            color: var(--primary);
+            box-shadow: 0 0 12px rgba(197, 160, 89, 0.3);
+        }
+        .step-dot.active .dot-label { color: var(--primary); }
+        .step-dot.done .dot {
+            border-color: var(--primary);
+            background: var(--grad);
+            color: #000;
+        }
+        .step-dot.done .dot-label { color: var(--primary); }
+
+        .step-line {
+            width: 40px;
+            height: 2px;
+            background: #222;
+            margin: 0 4px;
+            margin-bottom: 20px;
+            border-radius: 2px;
+            transition: background 0.4s ease;
+            flex-shrink: 0;
+        }
+        .step-line.done { background: var(--primary); }
+
+        /* Seções bloqueadas / reveladas */
+        .step-section {
+            transition: opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease;
+        }
+        .step-section.locked {
+            opacity: 0.25;
+            pointer-events: none;
+            filter: blur(1.5px);
+            user-select: none;
+        }
+        .step-section.revealed {
+            animation: revealStep 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes revealStep {
+            from { opacity: 0; transform: translateY(18px); filter: blur(2px); }
+            to   { opacity: 1; transform: translateY(0);   filter: blur(0); }
+        }
+
+        /* Hint de "próximo passo" */
+        .step-hint {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 6px 0 16px 4px;
+            animation: fadeInHint 0.4s ease forwards;
+        }
+        .step-hint.visible { display: flex; }
+        @keyframes fadeInHint {
+            from { opacity: 0; transform: translateX(-6px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        .step-hint::before {
+            content: '';
+            width: 3px;
+            height: 14px;
+            background: var(--grad);
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        /* ================================================= */
+
         .btn-cancelar-link {
             background: none;
-            border: none;
-            color: var(--text-dim);
+            border: 1px solid rgba(224, 82, 82, 0.4);
+            color: #e05252;
             font-size: 0.65rem;
             font-weight: 700;
             text-transform: uppercase;
             cursor: pointer;
             width: 100%;
-            margin-top: 15px;
-            text-decoration: underline;
+            margin-top: 10px;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 10px;
+            letter-spacing: 1px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .btn-cancelar-link:hover {
+            background: rgba(224, 82, 82, 0.08);
+            border-color: #e05252;
+        }
+
+        .btn-ver-agendamento {
+            background: none;
+            border: 1px solid rgba(197, 160, 89, 0.35);
+            color: var(--primary);
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 8px;
+            padding: 12px;
+            border-radius: 10px;
+            letter-spacing: 1px;
+            font-family: 'Inter', sans-serif;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .btn-ver-agendamento:hover {
+            background: rgba(197, 160, 89, 0.08);
+            border-color: var(--primary);
+        }
+
+        #modal-ver-agendamento {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
 
         #modal-sucesso,
@@ -418,74 +563,69 @@
             width: 100%;
         }
         
-        /* Estilo para o slot principal selecionado (já deve existir no seu código) */
         .hora-btn.selecionada {
             background: var(--grad) !important;
             border-color: var(--primary) !important;
             color: #000 !important;
         }
         
-        /* Estilo para a prévia dos blocos seguintes */
         .hora-btn.previa-slot {
-    background: rgba(197, 160, 89, 0.15) !important;
-    border: 1px dashed var(--primary) !important;
-    color: var(--primary) !important;
-    animation: blink 1s infinite alternate;
-}
-@keyframes blink {
-    from { opacity: 0.6; }
-    to { opacity: 1; }
-}
+            background: rgba(197, 160, 89, 0.15) !important;
+            border: 1px dashed var(--primary) !important;
+            color: var(--primary) !important;
+            animation: blink 1s infinite alternate;
+        }
+        @keyframes blink {
+            from { opacity: 0.6; }
+            to { opacity: 1; }
+        }
         
-        /* Container em grade: agora com minmax de 90px para caber mais itens por linha */
-/* Container: Ajustado para dar um pouco mais de espaço lateral para nomes longos */
-.barbeiros-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); /* Reduzido de 100px para 90px */
-    gap: 8px; /* Reduzido de 10px para 8px */
-    margin-top: 15px;
-}
+        .barbeiros-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+            gap: 8px;
+            margin-top: 15px;
+        }
 
-/* Card do Barbeiro: Ajustado com min-height para manter o padrão visual */
-.barbeiro-card {
-    background: var(--input-bg);
-    border: 2px solid transparent;
-    border-radius: 12px;
-    padding: 8px 5px; /* Reduzido o preenchimento interno */
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px; /* Menor espaço entre ícone e texto */
-    min-height: 65px; /* Redução significativa na altura */
-    justify-content: center;
-}
+        .barbeiro-card {
+            background: var(--input-bg);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 8px 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            min-height: 65px;
+            justify-content: center;
+        }
 
-.barbeiro-card.selected {
-    border-color: var(--primary);
-    background: rgba(197, 160, 89, 0.15);
-    transform: translateY(-2px);
-}
+        .barbeiro-card.selected {
+            border-color: var(--primary);
+            background: rgba(197, 160, 89, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(197, 160, 89, 0.2);
+        }
 
-.barbeiro-card i {
-    font-size: 1rem; 
-    color: var(--primary);
-    display: block;
-}
+        .barbeiro-card i {
+            font-size: 1rem; 
+            color: var(--primary);
+            display: block;
+        }
 
-/* Texto do Nome: Agora permite quebra de linha para mostrar o nome todo */
-.barbeiro-card span {
-    font-size: 0.75rem; 
-    font-weight: 600;
-    color: var(--text);
-    display: block;
-    line-height: 1.1;
-    word-wrap: break-word;
-    text-align: center;
-    width: 100%;
-}
+        .barbeiro-card span {
+            font-size: 0.75rem; 
+            font-weight: 600;
+            color: var(--text);
+            display: block;
+            line-height: 1.1;
+            word-wrap: break-word;
+            text-align: center;
+            width: 100%;
+        }
     </style>
 </head>
 
@@ -525,30 +665,59 @@
 
     <div class="container">
         <div class="header">
-            <img id="logo-barbearia" src="logo_insta.png" alt="Logo" class="logo-img">
-            <p id="txt-endereco-barbearia">Carregando...</p>
+            <img id="logo-site" src="logo_insta.png" alt="Logo" class="logo-img">
+            <p id="endereco-site">Carregando...</p>
             <div class="social-header">
                 <a id="link-instagram" href="https://www.instagram.com/el_negrones" target="_blank"><i class="fab fa-instagram"></i></a>
                 <a id="link-whatsapp" href="https://wa.me/5512996025236" target="_blank"><i class="fab fa-whatsapp"></i></a>
             </div>
         </div>
 
-        <div class="card">
-    <label>Quem vai cuidar do seu estilo?</label>
-    <select id="select-barbeiro" onchange="atualizarServicos()" style="display:none;">
-        <option value="">Selecione...</option>
-    </select>
-    
-    <div id="barbeiros-container" class="barbeiros-grid"></div>
+        <!-- BARRA DE PROGRESSO -->
+        <div class="steps-bar">
+            <div class="step-dot active" id="step-dot-1">
+                <div class="dot">1</div>
+                <span class="dot-label">Barbeiro</span>
+            </div>
+            <div class="step-line" id="step-line-1"></div>
+            <div class="step-dot" id="step-dot-2">
+                <div class="dot">2</div>
+                <span class="dot-label">Serviço &amp; Dia</span>
+            </div>
+            <div class="step-line" id="step-line-2"></div>
+            <div class="step-dot" id="step-dot-3">
+                <div class="dot">3</div>
+                <span class="dot-label">Horário</span>
+            </div>
+        </div>
 
+        <!-- STEP 1: BARBEIRO -->
+        <div class="card step-section" id="section-barbeiro">
+            <label>Quem vai cuidar do seu estilo?</label>
+            <select id="select-barbeiro" onchange="atualizarServicos()" style="display:none;">
+                <option value="">Selecione...</option>
+            </select>
+            <div id="barbeiros-container" class="barbeiros-grid"></div>
+        </div>
+
+        <!-- STEP 2: SERVIÇO + DIA -->
+        <div class="step-section locked" id="section-servico-dia">
+            <div class="step-hint" id="hint-servico">✂️ Agora escolha o serviço</div>
             <label>O que vamos fazer hoje?</label>
             <div id="grid-servicos" class="servicos-grid"></div>
             <input type="hidden" id="select-servico">
 
-            <label>Escolha o dia (Arraste 👉)</label>
-            <div class="datas-wrapper" id="render-datas"></div>
-            <input type="hidden" id="data-agenda">
+            <div id="section-dia" class="step-section locked">
+                <div class="step-hint" id="hint-dia">📅 Ótimo! Agora escolha o dia</div>
+                <label>Escolha o dia (Arraste 👉)</label>
+                <div class="datas-wrapper" id="render-datas"></div>
+                <input type="hidden" id="data-agenda">
+            </div>
+        </div>
 
+        <!-- STEP 3: HORÁRIO + DADOS + FINALIZAR -->
+        <div class="step-section locked" id="section-horario">
+            <div class="step-hint" id="hint-horario">⏰ Perfeito! Escolha o horário</div>
             <label>Horários Disponíveis</label>
             <div class="horarios-grid" id="grid-horarios"></div>
 
@@ -568,7 +737,22 @@
             </button>
 
             <button class="btn-principal" id="btn-confirmar" onclick="confirmarAgendamento()">Finalizar Agendamento</button>
-            <button class="btn-cancelar-link" onclick="document.getElementById('modal-cancelar').style.display='flex'">Cancelar meu agendamento</button>
+        </div>
+
+        <button class="btn-cancelar-link" onclick="document.getElementById('modal-cancelar').style.display='flex'">✕ Cancelar meu agendamento</button>
+        <button class="btn-ver-agendamento" onclick="document.getElementById('modal-ver-agendamento').style.display='flex'">🔍 Ver meu agendamento</button>
+    </div>
+
+    <!-- MODAL VER AGENDAMENTO -->
+    <div id="modal-ver-agendamento">
+        <div style="background: var(--card); padding: 30px 24px; border-radius: 28px; border: 1px solid var(--primary); max-width: 360px; width: 100%;">
+            <h3 style="color:var(--primary); font-family:'Cinzel'; margin-bottom: 15px; text-align:center; font-size:1rem;">VER AGENDAMENTO</h3>
+            <p style="font-size:0.7rem; color:var(--text-dim); text-align:center; margin-bottom:18px;">Informe seu WhatsApp e a data do agendamento</p>
+            <input type="tel" id="ver-zap" placeholder="(00) 00000-0000" style="text-align:center;">
+            <input type="date" id="ver-data" style="text-align:center; color-scheme: dark;">
+            <div id="lista-ver-agendamento" style="margin: 12px 0; display: flex; flex-direction: column; gap: 8px;"></div>
+            <button class="btn-principal" onclick="buscarMeusAgendamentos()">Buscar</button>
+            <button class="btn-cancelar-link" style="margin-top:10px;" onclick="document.getElementById('modal-ver-agendamento').style.display='none'; document.getElementById('lista-ver-agendamento').innerHTML='';">Fechar</button>
         </div>
     </div>
 
@@ -579,76 +763,38 @@
             projectId: "projeto-agend-barber",
             storageBucket: "projeto-agend-barber.firebasestorage.app",
             messagingSenderId: "368845787419",
-            appId: "1:368845787419:web:4eecbf361b2fe4d7e5c3be"
+            appId: "1:368845787419:web:cc902e9081e3a35cac2ae1"
         };
         
         firebase.initializeApp(firebaseConfig);
-        const _db = firebase.firestore();
-
-        // ── MULTI-TENANT: lê o ID do cliente pela URL ──
-        const _clienteId = new URLSearchParams(window.location.search).get('id');
-        if (!_clienteId) {
-            document.body.innerHTML = `
-            <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a0a;font-family:Inter,sans-serif;text-align:center;padding:20px">
-                <div>
-                    <div style="font-size:48px;margin-bottom:16px">⛔</div>
-                    <div style="color:#c5a059;font-size:20px;font-weight:800;margin-bottom:8px">LINK INVÁLIDO</div>
-                    <div style="color:#666;font-size:14px">Este link de agendamento não é válido.<br>Solicite o link correto à sua barbearia.</div>
-                </div>
-            </div>`;
-            throw new Error('ID não informado');
-        }
-        _db.collection('clientes').doc(_clienteId).get().then(async snap => {
-            if (!snap.exists || !snap.data().ativo) {
-                document.body.innerHTML = `
-                <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a0a;font-family:Inter,sans-serif;text-align:center;padding:20px">
-                    <div>
-                        <div style="font-size:48px;margin-bottom:16px">🔒</div>
-                        <div style="color:#c5a059;font-size:20px;font-weight:800;margin-bottom:8px">BARBEARIA INATIVA</div>
-                        <div style="color:#666;font-size:14px">Este serviço está temporariamente indisponível.</div>
-                    </div>
-                </div>`;
-            } else {
-                // Prioriza nome salvo na configuração interna
-                try {
-                    const cfgSnap = await _db.collection('clientes').doc(_clienteId)
-                        .collection('configuracao').doc('info').get();
-                    const nomeInterno = cfgSnap.exists && cfgSnap.data().nomeBarbearia
-                        ? cfgSnap.data().nomeBarbearia : snap.data().nome;
-                    if (nomeInterno) {
-                        document.title = '✂️ ' + nomeInterno + ' | Agendamento';
-                        // Atualiza elementos de nome no HTML se existirem
-                        document.querySelectorAll('.nome-barbearia-dinamico').forEach(el => {
-                            el.textContent = nomeInterno;
-                        });
-                    }
-                } catch(e) {
-                    if (snap.data().nome) document.title = '✂️ ' + snap.data().nome + ' | Agendamento';
-                }
-            }
-        });
-        const db = { collection: (col) => _db.collection('clientes').doc(_clienteId).collection(col) };
+        const db = firebase.firestore();
 
         let barbeirosData = [];
         let horarioSelecionado = null;
 
+        // Carrega configurações visuais do site (logo, endereço, redes sociais)
+        async function carregarConfigSite() {
+            try {
+                const doc = await db.collection('configuracao').doc('site').get();
+                if (doc.exists) {
+                    const d = doc.data();
+                    if (d.logoUrl) document.getElementById('logo-site').src = d.logoUrl;
+                    if (d.endereco) document.getElementById('endereco-site').textContent = d.endereco;
+                    if (d.instagram) document.getElementById('link-instagram').href = `https://www.instagram.com/${d.instagram.replace('@','')}` ;
+                    if (d.whatsapp) document.getElementById('link-whatsapp').href = `https://wa.me/55${d.whatsapp.replace(/\D/g,'')}` ;
+                } else {
+                    document.getElementById('endereco-site').textContent = 'Rua Ramira Cabral, 73 - CENTRO JACAREÍ - SP';
+                }
+            } catch(e) {
+                document.getElementById('endereco-site').textContent = 'Rua Ramira Cabral, 73 - CENTRO JACAREÍ - SP';
+            }
+        }
+
         window.onload = () => {
             carregarBarbeiros();
+            carregarConfigSite();
             mascarar(document.getElementById('whatsapp-cliente'));
             mascarar(document.getElementById('cancel-zap'));
-            // Carrega logo e endereço dinamicamente
-            db.collection("configuracao").doc("info").get().then(doc => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    if (data.endereco) document.getElementById('txt-endereco-barbearia').textContent = data.endereco;
-                    else document.getElementById('txt-endereco-barbearia').textContent = "";
-                    if (data.logo) document.getElementById('logo-barbearia').src = data.logo;
-                    if (data.instagram) document.getElementById('link-instagram').href = `https://www.instagram.com/${data.instagram}`;
-                    if (data.whatsapp) document.getElementById('link-whatsapp').href = `https://wa.me/${data.whatsapp}`;
-                } else {
-                    document.getElementById('txt-endereco-barbearia').textContent = "";
-                }
-            });
         };
 
         function mascarar(el) {
@@ -736,6 +882,15 @@
             
             // Atualiza a grade para bloquear os slots recém-ocupados
             carregarHorarios(data);
+
+            // Volta para step 2 para escolher outro serviço
+            document.querySelectorAll('.servico-card').forEach(c => c.classList.remove('selecionado'));
+            document.getElementById('select-servico').value = '';
+            document.getElementById('section-horario').classList.add('locked');
+            document.getElementById('grid-horarios').innerHTML = '';
+            atualizarStepDots(2);
+            mostrarHint('hint-servico');
+            scrollParaSecao('section-servico-dia');
             alert("Adicionado ao carrinho!");
         }
         
@@ -779,9 +934,9 @@
         
                 btn.textContent = "PROCESSANDO...";
         
-                // Se passou na verificação, salva diretamente no Firestore
+                // Se passou na verificação, prossegue com o agendamento
                 for (const ag of carrinho) {
-                    await db.collection("agenda").add({
+                    const payload = {
                         cliente: nomeInput,
                         whatsapp: zapInput,
                         barbeiroId: ag.barbeiroId,
@@ -789,30 +944,35 @@
                         data: ag.data,
                         hora: ag.hora,
                         servico: ag.servico,
-                        duracao: ag.duracao,
-                        concluido: false,
-                        criadoEm: new Date()
+                        duracao: ag.duracao
+                    };
+        
+                    const response = await fetch('/api/agendar', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
                     });
-
-                    // Notificação Telegram (se configurado)
-                    try {
-                        const botDoc = await db.collection("configuracao").doc("bot").get();
-                        if (botDoc.exists && botDoc.data().token && botDoc.data().chatId) {
-                            const { token, chatId } = botDoc.data();
-                            const msg = `🆕 *Novo Agendamento*
-👤 ${nomeInput}
-📱 ${zapInput}
-✂️ ${ag.servico}
-💈 ${ag.barbeiroNome}
-📅 ${ag.data.split("-").reverse().join("/")}
-⏰ ${ag.hora}`;
-                            fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ chat_id: chatId, text: msg, parse_mode: "Markdown" })
-                            }).catch(() => {});
+        
+                    const contentType = response.headers.get("content-type");
+                    let result;
+                    
+                    if (contentType && contentType.includes("application/json")) {
+                        result = await response.json();
+                    } else {
+                        const text = await response.text();
+                        throw new Error(`Erro ${response.status}: ${text.substring(0, 200)}`);
+                    }
+        
+                    if (!response.ok) {
+                        // Se o backend detectou conflito
+                        if (response.status === 409) {
+                            throw new Error("Este horário acabou de ser reservado por outro cliente. Por favor, escolha outro.");
                         }
-                    } catch(e) {}
+                        throw new Error(result.erro || result.error || `Erro HTTP ${response.status}`);
+                    }
                 }
         
                 carrinho = [];
@@ -849,6 +1009,8 @@
                 agSnap.docs.forEach(doc => {
                     const ag = doc.data();
                     const duracao = ag.duracao || 30;
+                    // Ignora concluídos e cancelados — eles liberam o horário
+                    if (ag.concluido === true || ag.status === "cancelado") return;
                     const slots = Math.ceil(duracao / 10);
                     let tempH = ag.hora;
                     for (let i = 0; i < slots; i++) {
@@ -932,11 +1094,64 @@
                 containerB.appendChild(card);
             });
         }
+        // ====== CONTROLE DE STEPS ======
+        function revelarSecao(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('locked');
+            el.classList.add('revealed');
+            // Remove a classe revealed depois da animação para não conflitar
+            setTimeout(() => el.classList.remove('revealed'), 600);
+        }
+
+        function atualizarStepDots(step) {
+            // step: 1, 2 ou 3
+            for (let i = 1; i <= 3; i++) {
+                const dot = document.getElementById(`step-dot-${i}`);
+                dot.classList.remove('active', 'done');
+                if (i < step) dot.classList.add('done');
+                else if (i === step) dot.classList.add('active');
+            }
+            for (let i = 1; i <= 2; i++) {
+                const line = document.getElementById(`step-line-${i}`);
+                line.classList.toggle('done', i < step);
+            }
+        }
+
+        function mostrarHint(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.add('visible');
+            setTimeout(() => el.classList.remove('visible'), 3000);
+        }
+
+        function scrollParaSecao(id) {
+            setTimeout(() => {
+                const el = document.getElementById(id);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+        // ================================
+
                 function atualizarServicos() {
             const bId = document.getElementById("select-barbeiro").value;
             const b = barbeirosData.find(x => x.id === bId);
             const gridS = document.getElementById("grid-servicos");
             gridS.innerHTML = '';
+
+            // Revela seção de serviço+dia e avança step
+            revelarSecao('section-servico-dia');
+            mostrarHint('hint-servico');
+            atualizarStepDots(2);
+            scrollParaSecao('section-servico-dia');
+
+            // Bloqueia dia e horário ao trocar barbeiro
+            document.getElementById('section-dia').classList.add('locked');
+            document.getElementById('section-horario').classList.add('locked');
+            document.getElementById('grid-horarios').innerHTML = '';
+            document.getElementById('data-agenda').value = '';
+            document.querySelectorAll('.card-data').forEach(c => c.classList.remove('selecionada'));
+
             if (b && b.servicos) {
                 b.servicos.split('\n').forEach(linha => {
                     if (linha.trim()) {
@@ -955,6 +1170,13 @@
                             card.classList.add('selecionado');
                             document.getElementById("select-servico").value = linha.trim();
                             resetarHorarios();
+                            // Revela o dia quando seleciona serviço
+                            revelarSecao('section-dia');
+                            mostrarHint('hint-dia');
+                            scrollParaSecao('section-dia');
+                            // Bloqueia horário ao trocar serviço
+                            document.getElementById('section-horario').classList.add('locked');
+                            document.getElementById('grid-horarios').innerHTML = '';
                         };
                         gridS.appendChild(card);
                     }
@@ -1001,6 +1223,11 @@
                     card.classList.add('selecionada');
                     document.getElementById('data-agenda').value = iso;
                     carregarHorarios(iso);
+                    // Revela horários e avança step
+                    revelarSecao('section-horario');
+                    mostrarHint('hint-horario');
+                    atualizarStepDots(3);
+                    scrollParaSecao('section-horario');
                 };
                 render.appendChild(card);
             }
@@ -1073,8 +1300,8 @@
         
                 agSnap.docs.forEach(doc => {
                 const ag = doc.data();
-                // PULA agendamentos já concluídos - eles liberam o horário
-                if (ag.concluido === true) return;
+                // Pula agendamentos concluídos ou cancelados - eles liberam o horário
+                if (ag.concluido === true || ag.status === "cancelado") return;
                 
                 let tempH = ag.hora;
                 for (let i = 0; i < Math.ceil(ag.duracao / 10); i++) {
@@ -1221,18 +1448,28 @@
 
             // Limpa o container e esconde o botão de busca
             listaContainer.innerHTML = '<p style="font-size:0.6rem; color:var(--primary); font-weight:bold; margin-bottom:10px;">CLIQUE NO HORÁRIO PARA CANCELAR:</p>';
-            btnBusca.style.display = 'none';
 
+            let algumExibido = false;
             snap.forEach(doc => {
                 const ag = doc.data();
+                // Não mostra agendamentos já cancelados
+                if (ag.status === "cancelado") return;
+                algumExibido = true;
                 const btn = document.createElement("button");
                 // Estilo do botão de cada horário
                 btn.style = "background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 12px; border-radius: 15px; font-size: 0.75rem; cursor: pointer; text-align: left; width: 100%;";
                 btn.innerHTML = `<b>⏰ ${ag.hora}</b> - ${ag.cliente}<br><small style="color:var(--text-dim)">${ag.servico}</small>`;
-                
                 btn.onclick = () => efetuarCancelamentoIndividual(doc.id, ag.data, ag.hora);
                 listaContainer.appendChild(btn);
             });
+
+            if (!algumExibido) {
+                listaContainer.innerHTML = '<p style="font-size:0.75rem; color:#ff4d4d; text-align:center; padding:15px 0;">Todos os agendamentos desta data já foram cancelados.</p>';
+                btnBusca.style.display = 'block'; // Reexibe o botão para o cliente tentar outra data
+                return;
+            }
+
+            btnBusca.style.display = 'none';
         }
 
         async function efetuarCancelamentoIndividual(id, dataAg, horaAg) { 
@@ -1250,18 +1487,22 @@
 
             if (confirm(`Deseja cancelar o horário das ${horaAg}?`)) {
                 try {
-                    // Busca os dados antes de deletar para enviar na notificação
                     const docRef = db.collection("agenda").doc(id);
                     const docSnap = await docRef.get();
                     const dadosAg = docSnap.data();
 
-                    await docRef.delete();
+                    // Marca como cancelado (não deleta) para aparecer no admin
+                    await docRef.update({ status: "cancelado", canceladoEm: new Date().toISOString() });
                     
-                    // Envia a notificação de cancelamento para o Telegram
                     const bNome = barbeirosData.find(b => b.id === dadosAg.barbeiroId)?.nome || "Não identificado";
-                    await enviarNotificacaoCancelamentoTelegram(dadosAg.cliente, dadosAg.data, dadosAg.hora, dadosAg.servico, bNome);
+                    const telegramOk = await enviarNotificacaoCancelamentoTelegram(dadosAg.cliente, dadosAg.data, dadosAg.hora, dadosAg.servico, bNome);
 
-                    alert("Agendamento cancelado com sucesso!");
+                    if (telegramOk) {
+                        alert("✅ Agendamento cancelado!\nA barbearia foi notificada via Telegram.");
+                    } else {
+                        alert("✅ Agendamento cancelado!\n⚠️ Aviso: não foi possível notificar o Telegram.");
+                    }
+
                     location.reload();
                 } catch (e) {
                     console.error(e);
@@ -1270,37 +1511,7 @@
             }
         }
         
-        async function cancelarAgendamentoConfirmado(id) {
-            try {
-                const docRef = db.collection("agenda").doc(id);
-                const snap = await docRef.get();
-                
-                if (snap.exists) {
-                    const dados = snap.data();
-                    
-                    // 1. Deleta do banco
-                    await docRef.delete();
-                    
-                    // 2. Busca o nome do barbeiro para a mensagem
-                    const bNome = barbeirosData.find(b => b.id === dados.barbeiroId)?.nome || "Barbeiro";
-                    
-                    // 3. ENVIA A NOTIFICAÇÃO (Aqui é onde o bot trabalha)
-                    await enviarNotificacaoCancelamentoTelegram(
-                        dados.cliente, 
-                        dados.data, 
-                        dados.hora, 
-                        dados.servico, 
-                        bNome
-                    );
-        
-                    alert("Cancelado com sucesso!");
-                    location.reload();
-                }
-            } catch (e) {
-                console.error("Erro no cancelamento:", e);
-                alert("Erro ao cancelar.");
-            }
-        }
+
 
         // Nova função para notificar o cancelamento
         async function enviarNotificacaoCancelamentoTelegram(n, d, h, s, b) {
@@ -1308,13 +1519,17 @@
         const doc = await db.collection("configuracao").doc("bot").get();
         
         if (!doc.exists) {
-            console.error("Configuração do bot não encontrada no Firestore!");
-            return;
+            console.error("❌ [Telegram] Configuração do bot não encontrada no Firestore!");
+            return false;
         }
 
         const { token, chatid } = doc.data();
+
+        if (!token || !chatid) {
+            console.error("❌ [Telegram] Token ou chatid estão vazios!", { token, chatid });
+            return false;
+        }
         
-        // Formata a data para o padrão brasileiro no corpo da mensagem
         const dataFormatada = d.split('-').reverse().join('/');
         
         const msg = `<b>🚫 AGENDAMENTO CANCELADO</b>\n\n` +
@@ -1324,6 +1539,8 @@
                     `<b>🧔 Barbeiro:</b> ${b.toUpperCase()}\n` +
                     `<b>⚡ Serviço:</b> ${s.toUpperCase()}`;
         
+        console.log(`[Telegram] Enviando cancelamento para chat_id: ${chatid}`);
+
         const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1334,14 +1551,279 @@
             })
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error("Erro na API do Telegram:", errorData);
+        const result = await response.json();
+
+        if (!result.ok) {
+            console.error("❌ [Telegram] Erro na API:", JSON.stringify(result));
+            return false;
         }
+
+        console.log("✅ [Telegram] Notificação de cancelamento enviada com sucesso!");
+        return true;
+
     } catch (err) {
-        console.error("Erro ao enviar notificação de cancelamento:", err);
+        console.error("❌ [Telegram] Exceção ao enviar notificação de cancelamento:", err);
+        return false;
     }
 }
+
+        // ═══════════════════════════════════════════
+        //  🎵 SOUND ENGINE — Web Audio API
+        //  Sons elegantes gerados sinteticamente.
+        //  Nenhum arquivo externo necessário.
+        // ═══════════════════════════════════════════
+
+        const SOM = (() => {
+            let ctx = null;
+
+            // Inicializa o AudioContext na primeira interação do usuário
+            function init() {
+                if (!ctx) {
+                    try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+                }
+                if (ctx && ctx.state === 'suspended') ctx.resume();
+            }
+
+            // Toca uma nota sintética com envelope ADSR simplificado
+            // freq: frequência em Hz | dur: duração em segundos
+            // type: 'sine'|'triangle'|'square'|'sawtooth'
+            // vol: volume 0–1 | attack | decay
+            function nota(freq, dur = 0.18, type = 'sine', vol = 0.18, attack = 0.005, decay = 0.12) {
+                if (!ctx) return;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+                // Envelope
+                gain.gain.setValueAtTime(0, ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + attack);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + attack + decay);
+
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + dur);
+            }
+
+            // Toca uma sequência de notas com delay entre elas
+            function seq(notas_arr, intervalo = 0.07) {
+                notas_arr.forEach(([freq, dur, type, vol], i) => {
+                    setTimeout(() => nota(freq, dur, type, vol), i * intervalo * 1000);
+                });
+            }
+
+            return {
+                // 1. Selecionar barbeiro — ping de cristal limpo
+                barbeiro() {
+                    init();
+                    nota(880, 0.22, 'sine', 0.14, 0.003, 0.18);
+                    setTimeout(() => nota(1108, 0.18, 'sine', 0.08, 0.003, 0.14), 60);
+                },
+
+                // 2. Selecionar serviço — clique metálico elegante
+                servico() {
+                    init();
+                    nota(660, 0.12, 'triangle', 0.15, 0.002, 0.09);
+                    setTimeout(() => nota(880, 0.10, 'triangle', 0.08, 0.002, 0.07), 50);
+                },
+
+                // 3. Selecionar dia — acorde suave ascendente
+                dia() {
+                    init();
+                    seq([
+                        [523, 0.18, 'sine', 0.12],
+                        [659, 0.18, 'sine', 0.10],
+                        [784, 0.22, 'sine', 0.09],
+                    ], 0.055);
+                },
+
+                // 4. Selecionar horário — ping dourado com ressonância
+                horario() {
+                    init();
+                    nota(740, 0.28, 'sine', 0.16, 0.003, 0.24);
+                    setTimeout(() => nota(988, 0.20, 'sine', 0.07, 0.003, 0.16), 40);
+                },
+
+                // 5. Adicionar ao carrinho — confirmação ascendente
+                carrinho() {
+                    init();
+                    seq([
+                        [523, 0.12, 'sine', 0.12],
+                        [659, 0.12, 'sine', 0.12],
+                        [784, 0.12, 'sine', 0.12],
+                        [1047, 0.22, 'sine', 0.14],
+                    ], 0.07);
+                },
+
+                // 6. Finalizar agendamento — acorde rico de sucesso
+                sucesso() {
+                    init();
+                    // Acorde de dó maior com brilho
+                    setTimeout(() => nota(523, 0.5, 'sine', 0.14), 0);
+                    setTimeout(() => nota(659, 0.5, 'sine', 0.11), 0);
+                    setTimeout(() => nota(784, 0.5, 'sine', 0.10), 0);
+                    setTimeout(() => nota(1047, 0.6, 'sine', 0.13, 0.01, 0.5), 80);
+                    setTimeout(() => nota(1319, 0.5, 'sine', 0.07, 0.01, 0.4), 160);
+                },
+
+                // 7. Cancelar / remover — tom descendente discreto
+                cancelar() {
+                    init();
+                    seq([
+                        [440, 0.14, 'sine', 0.10],
+                        [349, 0.18, 'sine', 0.08],
+                    ], 0.08);
+                },
+
+                // 8. Busca / ação genérica — toque neutro
+                tap() {
+                    init();
+                    nota(600, 0.10, 'triangle', 0.10, 0.002, 0.08);
+                },
+            };
+        })();
+
+        // ─── Injetar sons nas interações existentes ───
+
+        // Barbeiro
+        const _origCarregarBarbeiros = carregarBarbeiros;
+        carregarBarbeiros = async function() {
+            await _origCarregarBarbeiros.apply(this, arguments);
+            // Sobreescreve onclick dos cards para incluir som
+            document.querySelectorAll('.barbeiro-card').forEach(card => {
+                const _orig = card.onclick;
+                card.onclick = (e) => { SOM.barbeiro(); if(_orig) _orig.call(card, e); };
+            });
+        };
+
+        // Serviço — intercepta atualizarServicos
+        const _origAtualizarServicos = atualizarServicos;
+        atualizarServicos = function() {
+            _origAtualizarServicos.apply(this, arguments);
+            // Após render, reaplica onclick nos servico-cards
+            setTimeout(() => {
+                document.querySelectorAll('.servico-card').forEach(card => {
+                    const _orig = card.onclick;
+                    card.onclick = (e) => { SOM.servico(); if(_orig) _orig.call(card, e); };
+                });
+            }, 50);
+        };
+
+        // Dia — intercepta renderizarDatasPremium
+        const _origRenderizarDatas = renderizarDatasPremium;
+        renderizarDatasPremium = async function() {
+            await _origRenderizarDatas.apply(this, arguments);
+            setTimeout(() => {
+                document.querySelectorAll('.card-data').forEach(card => {
+                    const _orig = card.onclick;
+                    card.onclick = (e) => { SOM.dia(); if(_orig) _orig.call(card, e); };
+                });
+            }, 100);
+        };
+
+        // Horário — intercepta carregarHorarios
+        const _origCarregarHorarios = carregarHorarios;
+        carregarHorarios = async function() {
+            await _origCarregarHorarios.apply(this, arguments);
+            setTimeout(() => {
+                document.querySelectorAll('.hora-btn:not(.ocupada)').forEach(btn => {
+                    const _orig = btn.onclick;
+                    btn.onclick = (e) => { SOM.horario(); if(_orig) _orig.call(btn, e); };
+                });
+            }, 80);
+        };
+
+        // Adicionar ao carrinho
+        const _origAdicionarAoCarrinho = adicionarAoCarrinho;
+        adicionarAoCarrinho = function() {
+            SOM.carrinho();
+            _origAdicionarAoCarrinho.apply(this, arguments);
+        };
+
+        // Finalizar agendamento — toca som de sucesso quando modal aparece
+        const _origConfirmarAgendamento = confirmarAgendamento;
+        confirmarAgendamento = async function() {
+            await _origConfirmarAgendamento.apply(this, arguments);
+            // Se o modal de sucesso ficou visível, toca o acorde
+            if (document.getElementById('modal-sucesso').style.display === 'flex') {
+                SOM.sucesso();
+            }
+        };
+
+        // Remover do carrinho
+        const _origRemoverDoCarrinho = removerDoCarrinho;
+        removerDoCarrinho = function() {
+            SOM.cancelar();
+            _origRemoverDoCarrinho.apply(this, arguments);
+        };
+
+        // Cancelar agendamento (modal)
+        document.querySelector('.btn-cancelar-link')?.addEventListener('click', () => SOM.tap());
+
+        // Botão buscar cancelamento
+        document.getElementById('btn-buscar-cancel')?.addEventListener('click', () => SOM.tap());
+
+        // Botão efetuarCancelamentoIndividual
+        const _origEfetuar = efetuarCancelamentoIndividual;
+        efetuarCancelamentoIndividual = async function() {
+            SOM.cancelar();
+            await _origEfetuar.apply(this, arguments);
+        };
+
+    </script>
+    <script>
+        // Inicializa máscara do campo WhatsApp do modal Ver Agendamento
+        window.addEventListener('load', () => {
+            const verZap = document.getElementById('ver-zap');
+            if (verZap) mascarar(verZap);
+        });
+
+        async function buscarMeusAgendamentos() {
+            const zap = document.getElementById('ver-zap').value.replace(/\D/g, '');
+            const data = document.getElementById('ver-data').value;
+            const container = document.getElementById('lista-ver-agendamento');
+
+            if (!zap || !data) return alert('Preencha o WhatsApp e a data.');
+
+            container.innerHTML = '<p style="font-size:0.7rem; color:var(--text-dim); text-align:center;">Buscando...</p>';
+
+            try {
+                const snap = await db.collection('agenda')
+                    .where('whatsapp', '==', zap)
+                    .where('data', '==', data)
+                    .get();
+
+                const ativos = snap.docs.filter(d => {
+                    const s = d.data().status;
+                    return s !== 'cancelado' && d.data().concluido !== true;
+                });
+
+                if (ativos.length === 0) {
+                    container.innerHTML = '<p style="font-size:0.75rem; color:#ff4d4d; text-align:center; padding:12px 0;">Nenhum agendamento encontrado para esta data.</p>';
+                    return;
+                }
+
+                container.innerHTML = ativos.map(doc => {
+                    const ag = doc.data();
+                    const dataFmt = ag.data ? ag.data.split('-').reverse().join('/') : '—';
+                    return `
+                        <div style="background:#1a1a1a; border:1px solid rgba(197,160,89,0.3); border-radius:14px; padding:14px 16px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <span style="font-size:1rem; font-weight:900; color:var(--primary);">${ag.hora || '—'}</span>
+                                <span style="font-size:0.6rem; background:rgba(197,160,89,0.15); color:var(--primary); padding:2px 8px; border-radius:6px; font-weight:700; text-transform:uppercase;">Confirmado</span>
+                            </div>
+                            <p style="font-size:0.72rem; color:#ddd; margin:3px 0;"><strong>Barbeiro:</strong> ${ag.barbeiroNome || '—'}</p>
+                            <p style="font-size:0.72rem; color:#ddd; margin:3px 0;"><strong>Serviço:</strong> ${ag.servico || '—'}</p>
+                            <p style="font-size:0.72rem; color:#ddd; margin:3px 0;"><strong>Data:</strong> ${dataFmt}</p>
+                            ${ag.nome ? `<p style="font-size:0.72rem; color:#ddd; margin:3px 0;"><strong>Nome:</strong> ${ag.nome}</p>` : ''}
+                        </div>`;
+                }).join('');
+            } catch (e) {
+                console.error(e);
+                container.innerHTML = '<p style="font-size:0.75rem; color:#ff4d4d; text-align:center;">Erro ao buscar. Tente novamente.</p>';
+            }
+        }
     </script>
 </body>
 

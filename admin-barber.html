@@ -711,8 +711,13 @@
 
                 <div class="card">
                     <h3>🌐 Configurações do Site</h3>
-                    <label>URL da Logo</label>
-                    <input type="text" id="conf-logo-url" placeholder="https://...imagem.png">
+                    <label>Logo da Barbearia</label>
+                    <div id="logo-preview-wrap" style="display:none; text-align:center; margin-bottom:14px;">
+                        <img id="logo-preview-img" src="" style="max-width:140px; max-height:100px; object-fit:contain; border:1px solid var(--border-gold); border-radius:var(--radius-sm); padding:8px; background:#000;">
+                        <div style="font-size:0.55rem; color:var(--text-dim); margin-top:6px;">pré-visualização</div>
+                    </div>
+                    <input type="file" id="conf-logo-file" accept="image/*" onchange="previewLogo(this)" style="margin-bottom:12px;">
+                    <div id="logo-atual-info" style="font-size:0.6rem; color:var(--text-dim); margin-bottom:14px; display:none;">✓ Logo atual carregada</div>
                     <label>Endereço</label>
                     <input type="text" id="conf-endereco" placeholder="Rua Exemplo, 123 - Cidade - SP">
                     <label>Instagram (sem @)</label>
@@ -816,12 +821,54 @@
     }
 
     // ===== CONFIGURAÇÕES DO SITE =====
+    let logoBase64Nova = null; // guarda a nova imagem escolhida
+
+    function previewLogo(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                // Redimensiona para no máximo 400px mantendo proporção
+                const MAX = 400;
+                let w = img.width, h = img.height;
+                if (w > MAX || h > MAX) {
+                    if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+                    else       { w = Math.round(w * MAX / h); h = MAX; }
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                // Comprime como JPEG 80%
+                logoBase64Nova = canvas.toDataURL('image/jpeg', 0.80);
+                // Preview
+                const prevImg = document.getElementById('logo-preview-img');
+                const prevWrap = document.getElementById('logo-preview-wrap');
+                prevImg.src = logoBase64Nova;
+                prevWrap.style.display = 'block';
+                document.getElementById('logo-atual-info').style.display = 'none';
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
     async function carregarConfigSiteAdmin() {
         try {
             const doc = await db.collection('configuracao').doc('site').get();
             if (doc.exists) {
                 const d = doc.data();
-                if (d.logoUrl) document.getElementById('conf-logo-url').value = d.logoUrl;
+                if (d.logoUrl) {
+                    // Mostra preview da logo atual
+                    const prevImg = document.getElementById('logo-preview-img');
+                    const prevWrap = document.getElementById('logo-preview-wrap');
+                    const info = document.getElementById('logo-atual-info');
+                    prevImg.src = d.logoUrl;
+                    prevWrap.style.display = 'block';
+                    info.style.display = 'block';
+                }
                 if (d.endereco) document.getElementById('conf-endereco').value = d.endereco;
                 if (d.instagram) document.getElementById('conf-instagram').value = d.instagram;
                 if (d.whatsapp) document.getElementById('conf-whatsapp').value = d.whatsapp;
@@ -830,16 +877,23 @@
     }
 
     async function salvarConfigSite() {
-        const logoUrl = document.getElementById('conf-logo-url').value.trim();
         const endereco = document.getElementById('conf-endereco').value.trim();
         const instagram = document.getElementById('conf-instagram').value.trim();
         const whatsapp = document.getElementById('conf-whatsapp').value.trim();
+        const btn = document.querySelector('[onclick="salvarConfigSite()"]');
+        btn.disabled = true;
+        btn.textContent = 'SALVANDO...';
         try {
-            await db.collection('configuracao').doc('site').set({ logoUrl, endereco, instagram, whatsapp }, { merge: true });
+            const dados = { endereco, instagram, whatsapp };
+            // Só atualiza a logo se o usuário escolheu uma nova imagem
+            if (logoBase64Nova) dados.logoUrl = logoBase64Nova;
+            await db.collection('configuracao').doc('site').set(dados, { merge: true });
+            logoBase64Nova = null;
             const fb = document.getElementById('site-feedback');
             fb.style.display = 'block';
             setTimeout(() => fb.style.display = 'none', 3000);
         } catch(e) { alert('Erro ao salvar: ' + e.message); }
+        finally { btn.disabled = false; btn.textContent = 'SALVAR CONFIGURAÇÕES DO SITE'; }
     }
 
     // Carrega chave PIX do Firebase

@@ -1800,10 +1800,17 @@ async function excluirBloqueioDireto(id) {
         carregarAgenda();
     }
 
+    let _agendaUnsub = null; // guarda o listener ativo para cancelar antes de criar outro
+
     async function carregarAgenda() {
+    // Cancela listener anterior para não acumular
+    if (_agendaUnsub) { _agendaUnsub(); _agendaUnsub = null; }
+
     const bId = document.getElementById('filtro-barbeiro-agenda').value;
     const dataFiltro = document.getElementById('filtro-data-selecionada').value;
     const render = document.getElementById('render-agenda');
+
+    render.innerHTML = `<div style="text-align:center;padding:30px;color:var(--text-dim);font-size:0.75rem;">Carregando...</div>`;
 
     const barbSnap = await db.collection("barbeiros").get();
     const barbeirosNomes = {};
@@ -1813,20 +1820,31 @@ async function excluirBloqueioDireto(id) {
     if (bId) q = q.where("barbeiroId", "==", bId);
     if (dataFiltro) q = q.where("data", "==", dataFiltro);
 
-    q = q.orderBy("data", "asc").orderBy("hora", "asc");
+    // Sem orderBy composto (evita exigir índice composto no Firestore)
+    // Ordenação feita em JS após receber os dados
 
-    q.onSnapshot(snap => {
+    _agendaUnsub = q.onSnapshot(snap => {
         render.innerHTML = "";
         if (snap.empty) {
             render.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: var(--text-dim);"><span style="font-size: 3rem; display: block; margin-bottom: 10px;">📅</span><b style="color: var(--primary); font-size: 0.9rem; text-transform: uppercase;">Sem agendamentos</b></div>`;
             return;
         }
 
+        // Ordena em JS: por data asc, depois hora asc
+        const docs = [];
+        snap.forEach(doc => docs.push(doc));
+        docs.sort((a, b) => {
+            const da = a.data(), db2 = b.data();
+            const dataComp = (da.data || '').localeCompare(db2.data || '');
+            if (dataComp !== 0) return dataComp;
+            return (da.hora || '').localeCompare(db2.hora || '');
+        });
+
         const agora = new Date();
         const hojeISO = agora.toLocaleDateString('en-CA');
         let ultimaDataRenderizada = "";
 
-        snap.forEach(doc => {
+        docs.forEach(doc => {
             const ag = doc.data();
             const fone = ag.whatsapp ? ag.whatsapp.replace(/\D/g, '') : "";
             const nomeExibicao = ag.barbeiroNome || barbeirosNomes[ag.barbeiroId] || "Não definido";
@@ -1918,6 +1936,9 @@ async function excluirBloqueioDireto(id) {
                 </div>
             </div>`;
         });
+    }, err => {
+        console.error("Erro na agenda:", err);
+        render.innerHTML = `<div style="text-align:center;padding:30px;color:var(--danger);font-size:0.75rem;">Erro ao carregar agenda.<br><small>${err.message}</small></div>`;
     });
 }
 

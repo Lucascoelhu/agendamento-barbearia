@@ -636,6 +636,46 @@
             text-align: center;
             width: 100%;
         }
+        /* Botão flutuante: aparece ao selecionar um horário, para rolar até o final */
+        .btn-flutuante-final {
+            position: fixed;
+            left: 50%;
+            bottom: 18px;
+            transform: translateX(-50%) translateY(90px);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 900;
+            background: var(--grad);
+            color: #000;
+            font-weight: 900;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 50px;
+            padding: 14px 26px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
+        }
+
+        .btn-flutuante-final.visivel {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .btn-flutuante-final i {
+            font-size: 0.8rem;
+            animation: bounceDown 1.4s infinite;
+        }
+
+        @keyframes bounceDown {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(3px); }
+        }
     </style>
 </head>
 
@@ -752,6 +792,11 @@
         <button class="btn-cancelar-link" onclick="document.getElementById('modal-cancelar').style.display='flex'">✕ Cancelar meu agendamento</button>
         <button class="btn-ver-agendamento" onclick="document.getElementById('modal-ver-agendamento').style.display='flex'">🔍 Ver meu agendamento</button>
     </div>
+
+    <!-- BOTÃO FLUTUANTE: aparece ao selecionar um horário -->
+    <button id="btn-scroll-final" class="btn-flutuante-final" onclick="rolarParaFinalizar()">
+        Continuar <i class="fas fa-chevron-down"></i>
+    </button>
 
     <!-- MODAL VER AGENDAMENTO -->
     <div id="modal-ver-agendamento">
@@ -1096,6 +1141,7 @@
                     card.classList.add('selected');
                     selectB.value = id;
                     selectB.dispatchEvent(new Event('change'));
+                    esconderBotaoScrollFinal();
                     if (typeof atualizarServicos === 'function') {
                         atualizarServicos();
                     }
@@ -1140,6 +1186,23 @@
                 const el = document.getElementById(id);
                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 100);
+        }
+
+        // Mostra/esconde o botão flutuante de "Continuar" que rola até o final
+        function mostrarBotaoScrollFinal() {
+            const btn = document.getElementById('btn-scroll-final');
+            if (btn) btn.classList.add('visivel');
+        }
+
+        function esconderBotaoScrollFinal() {
+            const btn = document.getElementById('btn-scroll-final');
+            if (btn) btn.classList.remove('visivel');
+        }
+
+        function rolarParaFinalizar() {
+            const alvo = document.getElementById('btn-confirmar') || document.getElementById('nome-cliente');
+            if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            esconderBotaoScrollFinal();
         }
         // ================================
 
@@ -1233,6 +1296,7 @@
                     card.classList.add('selecionada');
                     document.getElementById('data-agenda').value = iso;
                     carregarHorarios(iso);
+                    esconderBotaoScrollFinal();
                     // Revela horários e avança step
                     revelarSecao('section-horario');
                     mostrarHint('hint-horario');
@@ -1410,6 +1474,7 @@
 
                             btn.classList.add("selecionada");
                             horarioSelecionado = h;
+                            mostrarBotaoScrollFinal();
 
                             let proximoPreview = h;
                             for (let i = 1; i < slotsNecessarios; i++) {
@@ -1468,6 +1533,7 @@
         function resetarHorarios() {
             horarioSelecionado = null;
             document.getElementById("grid-horarios").innerHTML = "";
+            esconderBotaoScrollFinal();
         }
 
         async function buscarAgendamentosParaCancelar() {

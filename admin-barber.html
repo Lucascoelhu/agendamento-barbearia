@@ -495,7 +495,7 @@
 <!-- TELA DE LOGIN -->
 <div id="login-screen" style="position:fixed;inset:0;background:#080808;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px;padding:30px;">
   <div style="text-align:center;margin-bottom:10px;">
-    <div style="font-family:Cinzel,serif;color:#c5a059;font-size:1.4rem;letter-spacing:4px;text-shadow:0 0 20px rgba(197,160,89,0.4);">EL NEGRONES</div>
+    <div id="txt-nome-barbearia-login" style="font-family:Cinzel,serif;color:#c5a059;font-size:1.4rem;letter-spacing:4px;text-shadow:0 0 20px rgba(197,160,89,0.4);">Nome da Barbearia</div>
     <div style="font-size:0.6rem;color:#444;letter-spacing:2px;margin-top:4px;">PAINEL ADMINISTRATIVO</div>
   </div>
   <div style="width:100%;max-width:340px;background:#111;border:1px solid #1e1e1e;border-radius:20px;padding:30px;box-shadow:0 20px 60px rgba(0,0,0,0.8);">
@@ -711,6 +711,8 @@
 
                 <div class="card">
                     <h3>🌐 Configurações do Site</h3>
+                    <label>Nome da Barbearia</label>
+                    <input type="text" id="conf-nome-barbearia" placeholder="Ex: Nome da Barbearia">
                     <label>Logo da Barbearia</label>
                     <div id="logo-preview-wrap" style="display:none; text-align:center; margin-bottom:14px;">
                         <img id="logo-preview-img" src="" style="max-width:140px; max-height:100px; object-fit:contain; border:1px solid var(--border-gold); border-radius:var(--radius-sm); padding:8px; background:#000;">
@@ -721,7 +723,7 @@
                     <label>Endereço</label>
                     <input type="text" id="conf-endereco" placeholder="Rua Exemplo, 123 - Cidade - SP">
                     <label>Instagram (sem @)</label>
-                    <input type="text" id="conf-instagram" placeholder="el_negrones">
+                    <input type="text" id="conf-instagram" placeholder="nomedabarbearia">
                     <label>WhatsApp (somente números)</label>
                     <input type="text" id="conf-whatsapp" placeholder="12996025236">
                     <button class="btn-action" onclick="salvarConfigSite()">Salvar Configurações do Site</button>
@@ -765,6 +767,10 @@
 
     // ===== AUTENTICAÇÃO =====
     let adminUser = null;
+    let nomeBarbeariaGlobal = "Nome da Barbearia";
+
+    // Carrega o nome da barbearia já na tela de login (antes de autenticar)
+    carregarConfigSiteAdmin();
 
     // Verifica estado do login ao carregar
     auth.onAuthStateChanged(user => {
@@ -869,6 +875,12 @@
                     prevWrap.style.display = 'block';
                     info.style.display = 'block';
                 }
+                if (d.nome) {
+                    document.getElementById('conf-nome-barbearia').value = d.nome;
+                    nomeBarbeariaGlobal = d.nome;
+                    const tituloLogin = document.getElementById('txt-nome-barbearia-login');
+                    if (tituloLogin) tituloLogin.textContent = d.nome;
+                }
                 if (d.endereco) document.getElementById('conf-endereco').value = d.endereco;
                 if (d.instagram) document.getElementById('conf-instagram').value = d.instagram;
                 if (d.whatsapp) document.getElementById('conf-whatsapp').value = d.whatsapp;
@@ -877,6 +889,7 @@
     }
 
     async function salvarConfigSite() {
+        const nome = document.getElementById('conf-nome-barbearia').value.trim();
         const endereco = document.getElementById('conf-endereco').value.trim();
         const instagram = document.getElementById('conf-instagram').value.trim();
         const whatsapp = document.getElementById('conf-whatsapp').value.trim();
@@ -884,11 +897,14 @@
         btn.disabled = true;
         btn.textContent = 'SALVANDO...';
         try {
-            const dados = { endereco, instagram, whatsapp };
+            const dados = { nome, endereco, instagram, whatsapp };
             // Só atualiza a logo se o usuário escolheu uma nova imagem
             if (logoBase64Nova) dados.logoUrl = logoBase64Nova;
             await db.collection('configuracao').doc('site').set(dados, { merge: true });
             logoBase64Nova = null;
+            nomeBarbeariaGlobal = nome || "Nome da Barbearia";
+            const tituloLogin = document.getElementById('txt-nome-barbearia-login');
+            if (tituloLogin) tituloLogin.textContent = nomeBarbeariaGlobal;
             const fb = document.getElementById('site-feedback');
             fb.style.display = 'block';
             setTimeout(() => fb.style.display = 'none', 3000);
@@ -1894,9 +1910,9 @@ async function excluirBloqueioDireto(id) {
             const estiloConf = jaConfirmou ? "background:#333; color:#777;" : "background:#25d366; color:#000;";
             const textoConf = jaConfirmou ? "AVISADO ✅" : "CONFIRMAR";
 
-            const msgLembrete = `Olá ${ag.cliente}! ✂️\n\nConfirmando seu horário na *BARBEARIA EL NEGRONES*:\n📅 *Hoje, ${dataBR}*\n⏰ às *${ag.hora}*\n\nAté logo! 🔥`;
-            const msgConfirmacao = `Olá ${ag.cliente}! ✅\n\nSeu agendamento na *BARBEARIA EL NEGRONES* foi recebido!\n\n📅 Data: *${dataBR}*\n⏰ Horário: *${ag.hora}*\n✂️ Serviço: *${ag.servico || '-'}*\n💈 Profissional: *${nomeExibicao}*\n\nTe aguardamos! 🔥`;
-            const msgCancelamento = `Olá ${ag.cliente}! ✂️\n\nPassando para confirmar que seu agendamento na *BARBEARIA EL NEGRONES* foi *cancelado*:\n\n📅 Data: *${dataBR}*\n⏰ Horário: *${ag.hora}*\n✂️ Serviço: *${ag.servico || '-'}*\n\nQualquer dúvida, estamos à disposição! 🔥`;
+            const msgLembrete = `Olá ${ag.cliente}! ✂️\n\nConfirmando seu horário na *${nomeBarbeariaGlobal}*:\n📅 *Hoje, ${dataBR}*\n⏰ às *${ag.hora}*\n\nAté logo! 🔥`;
+            const msgConfirmacao = `Olá ${ag.cliente}! ✅\n\nSeu agendamento na *${nomeBarbeariaGlobal}* foi recebido!\n\n📅 Data: *${dataBR}*\n⏰ Horário: *${ag.hora}*\n✂️ Serviço: *${ag.servico || '-'}*\n💈 Profissional: *${nomeExibicao}*\n\nTe aguardamos! 🔥`;
+            const msgCancelamento = `Olá ${ag.cliente}! ✂️\n\nPassando para confirmar que seu agendamento na *${nomeBarbeariaGlobal}* foi *cancelado*:\n\n📅 Data: *${dataBR}*\n⏰ Horário: *${ag.hora}*\n✂️ Serviço: *${ag.servico || '-'}*\n\nQualquer dúvida, estamos à disposição! 🔥`;
 
             // --- BOTÕES CONFORME STATUS ---
             let botoesHTML = "";
